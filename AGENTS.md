@@ -9,12 +9,14 @@ This document provides instructions and guidelines for AI agents operating withi
 - **Language:** Go 1.23+
 - **Entry Point:** `main.go`
 - **Module:** `opencode-agent-switcher`
-- **Dependencies:** `gopkg.in/yaml.v3` (only external dependency)
+- **Dependencies:** 
+  - `gopkg.in/yaml.v3` - YAML parsing
+  - `github.com/charmbracelet/huh` - Interactive TUI
 
 ### Package Structure
 | Package | Purpose |
 |---------|---------|
-| `cli/` | User interface and prompts (`cli/prompt.go`) |
+| `cli/` | User interface and TUI prompts (`cli/prompt.go`) |
 | `config/` | Configuration loading and parsing (`config/config.go`) |
 | `agents/` | Agent discovery and modification logic (`agents/agents.go`) |
 | `models/` | Shared data structures (`models/models.go`) |
@@ -44,6 +46,7 @@ go test -coverprofile=coverage.out ./... && go tool cover -html=coverage.out  # 
 gofmt -s -w .                                   # Format all files
 go vet ./...                                    # Static analysis
 go mod tidy                                     # Clean up go.mod
+make lint                                       # Run golangci-lint
 ```
 
 ## 3. Code Style and Conventions
@@ -58,10 +61,10 @@ go mod tidy                                     # Clean up go.mod
 Group imports with blank lines: Standard Library → Third-party → Local packages
 ```go
 import (
-	"bufio"
 	"fmt"
 	"os"
 
+	"github.com/charmbracelet/huh"
 	"gopkg.in/yaml.v3"
 
 	"opencode-agent-switcher/models"
@@ -126,6 +129,12 @@ description: Agent description
 # Agent instructions here
 ```
 
+### TUI Interaction (Huh? Library)
+The tool uses `github.com/charmbracelet/huh` for interactive prompts:
+- `PromptAgentSelection()` - Select from agent list
+- `PromptModelSelection()` - Select from model list
+- `PromptConfirm()` - Yes/No confirmation
+
 ### External CLI Dependency
 - Tool calls `opencode models` to fetch available models
 - Falls back to parsing `opencode.json` if CLI unavailable
@@ -174,6 +183,21 @@ if !ok {
 }
 ```
 
+### TUI Form Pattern
+```go
+form := huh.NewForm(
+    huh.NewGroup(
+        huh.NewSelect[string]().
+            Title("Select an option").
+            Options(options...).
+            Value(&selected),
+    ),
+)
+if err := form.Run(); err != nil {
+    return err
+}
+```
+
 ## 7. Adding New Code
 
 When adding new functionality:
@@ -181,7 +205,8 @@ When adding new functionality:
 2. Place business logic in appropriate package (`agents/`, `config/`, `cli/`)
 3. Export functions that may be used by other packages
 4. Add comments to exported functions
-5. Run `gofmt -s -w .` and `go vet ./...` before committing
+5. Add unit tests in `*_test.go` files
+6. Run `make check` before committing
 
 ## 8. Cursor/Copilot Rules
 

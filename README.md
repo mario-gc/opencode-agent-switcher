@@ -10,7 +10,7 @@ A CLI tool for managing and switching AI models for Opencode agents.
 
 - **Agent Discovery:** Automatically detects available agents configured in `~/.config/opencode/agents/`
 - **Model Discovery:** Fetches available AI models from the `opencode` CLI or falls back to the configuration file
-- **Interactive Selection:** User-friendly CLI to select an agent and a target model
+- **Interactive TUI:** Beautiful terminal user interface using [Huh?](https://github.com/charmbracelet/huh) for selection
 - **Batch Updates:** Detects if multiple agents are using the same model and offers to update them all simultaneously
 - **Configuration Management:** Safely updates the YAML configuration files for the agents
 
@@ -54,11 +54,12 @@ opencode-agent-switcher
 ### Workflow
 
 1. The tool loads your Opencode configuration and available agents
-2. It presents a list of agents to choose from
-3. After selecting an agent, it displays a list of available AI models
-4. Select the new model you wish to assign to the agent
-5. If other agents are currently using the same model as the selected agent, the tool will ask if you want to update those agents as well
-6. The tool updates the agent configuration files with the new model ID
+2. An interactive menu appears showing all available agents with their current models
+3. Use arrow keys to navigate and Enter to select an agent
+4. A second menu appears with all available models
+5. Select the new model you wish to assign to the agent
+6. If other agents use the same model, you'll be asked if you want to update them too
+7. The tool updates the agent configuration files and shows confirmation
 
 ## Development
 
@@ -66,14 +67,17 @@ opencode-agent-switcher
 
 ```
 .
-├── main.go          # Entry point
-├── cli/             # User interaction and prompts
-├── config/          # Configuration loading and parsing
-├── agents/          # Agent discovery and modification
-├── models/          # Shared data structures
-├── Makefile         # Build automation
-├── .golangci.yml    # Linting configuration
-└── go.mod           # Go module definition
+├── main.go              # Entry point
+├── cli/                 # User interaction and TUI prompts
+│   └── prompt.go        # Huh? based interactive prompts
+├── config/              # Configuration loading and parsing
+│   └── config.go        # Opencode config handling
+├── agents/              # Agent discovery and modification
+│   └── agents.go        # Agent file operations
+├── models/              # Shared data structures
+├── Makefile             # Build automation
+├── .golangci.yml        # Linting configuration
+└── go.mod               # Go module definition
 ```
 
 ### Commands
