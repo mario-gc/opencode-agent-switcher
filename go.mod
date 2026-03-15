@@ -1,4 +1,4 @@
-module agent-switcher
+module opencode-agent-switcher
 
 go 1.23
 

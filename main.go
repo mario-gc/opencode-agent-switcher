@@ -8,10 +8,10 @@ import (
 	"path/filepath"
 	"strings"
 
-	"agent-switcher/agents"
-	"agent-switcher/cli"
-	"agent-switcher/config"
-	"agent-switcher/models"
+	"opencode-agent-switcher/agents"
+	"opencode-agent-switcher/cli"
+	"opencode-agent-switcher/config"
+	"opencode-agent-switcher/models"
 )
 
 func main() {

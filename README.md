@@ -1,4 +1,4 @@
-# Agent Switcher
+# Opencode Agent Switcher
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/mario-gc/opencode-agent-switcher)](https://goreportcard.com/report/github.com/mario-gc/opencode-agent-switcher)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
@@ -33,7 +33,7 @@ cd opencode-agent-switcher
 go install
 
 # Or build locally
-go build -o agent-switcher main.go
+go build -o opencode-agent-switcher main.go
 ```
 
 ### Using Make
@@ -48,7 +48,7 @@ make install  # Install to GOPATH/bin
 Run the tool directly from the terminal:
 
 ```bash
-agent-switcher
+opencode-agent-switcher
 ```
 
 ### Workflow

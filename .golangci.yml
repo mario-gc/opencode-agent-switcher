@@ -34,7 +34,7 @@ linters-settings:
     simplify: true
 
   goimports:
-    local-prefixes: agent-switcher
+    local-prefixes: opencode-agent-switcher
 
   misspell:
     locale: US

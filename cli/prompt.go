@@ -6,7 +6,7 @@ import (
 	"strconv"
 	"strings"
 
-	"agent-switcher/models"
+	"opencode-agent-switcher/models"
 )
 
 // PromptAgentSelection presents interactive agent selection

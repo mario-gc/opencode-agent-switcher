@@ -7,7 +7,7 @@ import (
 	"regexp"
 	"strings"
 
-	"agent-switcher/models"
+	"opencode-agent-switcher/models"
 
 	"gopkg.in/yaml.v3"
 )

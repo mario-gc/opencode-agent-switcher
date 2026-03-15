@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"agent-switcher/models"
+	"opencode-agent-switcher/models"
 )
 
 var validModelIDPattern = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_\-\.\/]*$`)

@@ -1,14 +1,14 @@
-# Agentic Coding Guidelines for Agent Switcher
+# Agentic Coding Guidelines for Opencode Agent Switcher
 
-This document provides instructions and guidelines for AI agents operating within the `agent-switcher` codebase.
+This document provides instructions and guidelines for AI agents operating within the `opencode-agent-switcher` codebase.
 
 ## 1. Project Overview
 
-`agent-switcher` is a Go CLI tool designed to manage and switch AI models for various agents in the Opencode environment. It interacts with the `opencode` CLI and modifies agent configuration files.
+`opencode-agent-switcher` is a Go CLI tool designed to manage and switch AI models for various agents in the Opencode environment. It interacts with the `opencode` CLI and modifies agent configuration files.
 
 - **Language:** Go 1.23+
 - **Entry Point:** `main.go`
-- **Module:** `agent-switcher`
+- **Module:** `opencode-agent-switcher`
 - **Dependencies:** `gopkg.in/yaml.v3` (only external dependency)
 
 ### Package Structure
@@ -23,27 +23,27 @@ This document provides instructions and guidelines for AI agents operating withi
 
 ### Build
 ```bash
-go build -o agent-switcher main.go    # Build binary
-go run main.go                         # Run without building
-./agent-switcher                       # Run built binary
+go build -o opencode-agent-switcher main.go    # Build binary
+go run main.go                                  # Run without building
+./opencode-agent-switcher                       # Run built binary
 ```
 
 ### Testing
 ```bash
-go test ./...                          # Run all tests
-go test -v ./...                       # Verbose output
-go test -v ./agents -run TestLoadAgents  # Single test function
-go test -v ./config                    # Tests for specific package
-go test -race ./...                    # Race detector
-go test -cover ./...                   # Coverage report
+go test ./...                                   # Run all tests
+go test -v ./...                                # Verbose output
+go test -v ./agents -run TestLoadAgents         # Single test function
+go test -v ./config                             # Tests for specific package
+go test -race ./...                             # Race detector
+go test -cover ./...                            # Coverage report
 go test -coverprofile=coverage.out ./... && go tool cover -html=coverage.out  # HTML coverage
 ```
 
 ### Linting and Formatting
 ```bash
-gofmt -s -w .                          # Format all files
-go vet ./...                           # Static analysis
-go mod tidy                            # Clean up go.mod
+gofmt -s -w .                                   # Format all files
+go vet ./...                                    # Static analysis
+go mod tidy                                     # Clean up go.mod
 ```
 
 ## 3. Code Style and Conventions
@@ -64,7 +64,7 @@ import (
 
 	"gopkg.in/yaml.v3"
 
-	"agent-switcher/models"
+	"opencode-agent-switcher/models"
 )
 ```
 

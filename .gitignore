@@ -4,7 +4,7 @@
 *.dll
 *.so
 *.dylib
-agent-switcher
+opencode-agent-switcher
 
 # Test binary, built with `go test -c`
 *.test

@@ -5,6 +5,12 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Changed
+- Renamed project from "Agent Switcher" to "Opencode Agent Switcher"
+- Updated module name from `agent-switcher` to `opencode-agent-switcher`
+
 ## [0.2.0] - 2026-03-15
 
 ### Added
@@ -27,7 +33,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [0.1.0] - 2026-03-15
 
 ### Added
-- Initial release of agent-switcher
+- Initial release of opencode-agent-switcher
 - CLI tool for managing AI agent model configurations
 - Agent discovery from `~/.config/opencode/agents/`
 - Model discovery via `opencode models` CLI or config file fallback
@@ -36,5 +42,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - YAML frontmatter parsing for agent configuration files
 - MIT License
 
+[Unreleased]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.2.0...HEAD
 [0.2.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/mario-gc/opencode-agent-switcher/releases/tag/v0.1.0

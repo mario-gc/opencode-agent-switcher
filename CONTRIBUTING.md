@@ -1,12 +1,12 @@
-# Contributing to Agent Switcher
+# Contributing to Opencode Agent Switcher
 
-Thank you for your interest in contributing to agent-switcher! This document provides guidelines and instructions for contributing.
+Thank you for your interest in contributing to opencode-agent-switcher! This document provides guidelines and instructions for contributing.
 
 ## Development Setup
 
 ### Prerequisites
 
-- Go 1.22 or later
+- Go 1.23 or later
 - Make (optional, for using Makefile targets)
 
 ### Getting Started
