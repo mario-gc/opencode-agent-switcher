@@ -22,6 +22,10 @@ func TestIsValidModelID(t *testing.T) {
 		{"invalid chars", "provider/model@name", false},
 		{"starts with special char", "-provider/model", false},
 		{"special chars in middle", "provider/model name", false},
+		{"segment starts with dash", "provider/-model", false},
+		{"no slash", "provider", false},
+		{"single slash empty model", "provider/", false},
+		{"empty provider", "/model", false},
 	}
 
 	for _, tt := range tests {

@@ -20,6 +20,10 @@ func TestValidateModelID(t *testing.T) {
 		{"too long", "a/" + string(make([]byte, 256)), true},
 		{"invalid chars", "provider/model@name", true},
 		{"starts with special char", "provider/-model", true},
+		{"no slash", "provider", true},
+		{"single slash empty model", "provider/", true},
+		{"empty provider", "/model", true},
+		{"valid with multiple slashes", "provider/model/variant", false},
 	}
 
 	for _, tt := range tests {

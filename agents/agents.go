@@ -14,7 +14,7 @@ import (
 
 const maxFrontmatterSize = 64 * 1024
 
-var validModelID = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_\-\.\/]*$`)
+var validSegment = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_\-\.]*$`)
 
 func ValidateModelID(modelID string) error {
 	if modelID == "" {
@@ -23,9 +23,21 @@ func ValidateModelID(modelID string) error {
 	if len(modelID) > 256 {
 		return fmt.Errorf("model ID exceeds maximum length")
 	}
-	if !validModelID.MatchString(modelID) {
-		return fmt.Errorf("invalid model ID format: contains disallowed characters")
+
+	segments := strings.Split(modelID, "/")
+	if len(segments) < 2 {
+		return fmt.Errorf("model ID must be in format 'provider/model'")
 	}
+
+	for _, segment := range segments {
+		if segment == "" {
+			return fmt.Errorf("model ID contains empty segment")
+		}
+		if !validSegment.MatchString(segment) {
+			return fmt.Errorf("invalid segment '%s': must start with alphanumeric and contain only alphanumeric, dash, underscore, or dot", segment)
+		}
+	}
+
 	return nil
 }
 

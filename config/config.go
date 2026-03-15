@@ -12,13 +12,25 @@ import (
 	"opencode-agent-switcher/models"
 )
 
-var validModelIDPattern = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_\-\.\/]*$`)
+var validSegmentPattern = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_\-\.]*$`)
 
 func isValidModelID(modelID string) bool {
 	if modelID == "" || len(modelID) > 256 {
 		return false
 	}
-	return validModelIDPattern.MatchString(modelID)
+
+	segments := strings.Split(modelID, "/")
+	if len(segments) < 2 {
+		return false
+	}
+
+	for _, segment := range segments {
+		if segment == "" || !validSegmentPattern.MatchString(segment) {
+			return false
+		}
+	}
+
+	return true
 }
 
 func LoadOpencodeConfig() (*models.OpencodeConfig, error) {
