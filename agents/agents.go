@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"agent-switcher/models"
+
 	"gopkg.in/yaml.v3"
 )
 
@@ -80,7 +81,10 @@ func LoadAgents(agentsDir string) ([]models.Agent, error) {
 				continue
 			}
 
-			description, _ := frontmatter["description"].(string)
+			description, ok := frontmatter["description"].(string)
+			if !ok {
+				description = ""
+			}
 
 			agentList = append(agentList, models.Agent{
 				Name:         strings.TrimSuffix(file.Name(), ".md"),
@@ -133,7 +137,7 @@ func UpdateAgentModel(agentPath, newModel string) error {
 	}
 
 	var frontmatter map[string]interface{}
-	if err := yaml.Unmarshal([]byte(parts[1]), &frontmatter); err != nil {
+	if err = yaml.Unmarshal([]byte(parts[1]), &frontmatter); err != nil {
 		return err
 	}
 
