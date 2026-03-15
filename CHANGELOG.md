@@ -5,6 +5,20 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+## [0.3.0] - 2026-03-15
+
+### Added
+- Exit option in main menu - users can now exit directly from agent selection
+- Undo functionality - after updating agents, users can undo changes and restore previous models
+- Loop to main menu - after completing changes, users can choose to continue or exit
+- Basic tests for cli package constants
+
+### Changed
+- Refactored main.go into modular `runAgentUpdate` function for better loop handling
+- Agent list is now reloaded after each iteration when continuing
+
 ## [0.2.0] - 2026-03-15
 
 ### Added
@@ -43,5 +57,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - YAML frontmatter parsing for agent configuration files
 - MIT License
 
+[Unreleased]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.3.0...HEAD
+[0.3.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/mario-gc/opencode-agent-switcher/releases/tag/v0.1.0
