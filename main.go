@@ -1,12 +1,10 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"log"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"opencode-agent-switcher/agents"
 	"opencode-agent-switcher/cli"
@@ -14,17 +12,17 @@ import (
 	"opencode-agent-switcher/models"
 )
 
-func main() {
-	// Create a single reader for all stdin input
-	reader := bufio.NewReader(os.Stdin)
+var (
+	version = "dev"
+	commit  = "none"
+)
 
-	// 1. Load Opencode Config
+func main() {
 	cfg, err := config.LoadOpencodeConfig()
 	if err != nil {
 		log.Fatalf("Failed to load opencode config: %v", err)
 	}
 
-	// 2. Load Agents
 	home, err := os.UserHomeDir()
 	if err != nil {
 		log.Fatalf("Failed to get user home dir: %v", err)
@@ -40,8 +38,6 @@ func main() {
 		log.Fatalf("No agents found in %s", agentsDir)
 	}
 
-	// 3. Get Available Models
-	// Try CLI first
 	modelOptions, err := config.GetModelsFromCLI()
 	if err != nil {
 		fmt.Println("Warning: Failed to get models from CLI, falling back to config file...")
@@ -52,30 +48,20 @@ func main() {
 		log.Fatalf("No models found available")
 	}
 
-	// 4. Prompt for Agent Selection
-	agentIndex, err := cli.PromptAgentSelection(reader, agentList)
+	agentIndex, err := cli.PromptAgentSelection(agentList)
 	if err != nil {
-		log.Fatalf("Selection failed: %v", err)
+		log.Fatalf("Agent selection failed: %v", err)
 	}
 	selectedAgent := agentList[agentIndex]
 
-	// 5. Prompt for Model Selection
-	fmt.Printf("\nUpdating agent '%s' (Current: %s)\n", selectedAgent.Name, selectedAgent.CurrentModel)
-	modelIndex, err := cli.PromptModelSelection(reader, modelOptions)
+	modelIndex, err := cli.PromptModelSelection(modelOptions)
 	if err != nil {
-		log.Fatalf("Selection failed: %v", err)
+		log.Fatalf("Model selection failed: %v", err)
 	}
 	selectedModel := modelOptions[modelIndex]
 
-	// 6. Update Agent
-	// Find all agents with the same model if user wants to update all?
-	// For now, just update the selected agent as per original plan,
-	// but the user mentioned "if several agents use the same model, we change it in all those agents"
-	// Let's ask the user if they want to update all agents with this model.
-
 	agentsToUpdate := []models.Agent{selectedAgent}
 
-	// Check for other agents with same model
 	var otherAgents []models.Agent
 	for _, a := range agentList {
 		if a.Name != selectedAgent.Name && a.CurrentModel == selectedAgent.CurrentModel {
@@ -84,18 +70,12 @@ func main() {
 	}
 
 	if len(otherAgents) > 0 {
-		fmt.Printf("\nThe following agents also use model '%s':\n", selectedAgent.CurrentModel)
-		for _, a := range otherAgents {
-			fmt.Printf("- %s\n", a.Name)
-		}
-
-		fmt.Print("\nDo you want to update these agents as well? (y/n): ")
-		response, err := reader.ReadString('\n')
+		message := fmt.Sprintf("%d other agent(s) use the same model. Update all?", len(otherAgents))
+		confirmed, err := cli.PromptConfirm(message)
 		if err != nil {
-			log.Fatalf("Failed to read response: %v", err)
+			log.Fatalf("Confirmation failed: %v", err)
 		}
-		response = strings.TrimSpace(response)
-		if response == "y" || response == "Y" {
+		if confirmed {
 			agentsToUpdate = append(agentsToUpdate, otherAgents...)
 		}
 	}

@@ -7,9 +7,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- Interactive TUI using Huh? library for agent and model selection
+- Confirmation dialog for batch updates using TUI
+- Unit tests for agents package (LoadAgents, ParseFrontmatter, UpdateAgentModel, ValidateModelID)
+- Unit tests for config package (GetAvailableModels, isValidModelID)
+- Version information embedded in binary at build time
+
 ### Changed
 - Renamed project from "Agent Switcher" to "Opencode Agent Switcher"
 - Updated module name from `agent-switcher` to `opencode-agent-switcher`
+- Replaced text-based prompts with interactive TUI selection
 
 ## [0.2.0] - 2026-03-15
 
