@@ -6,7 +6,7 @@ This document provides instructions and guidelines for AI agents operating withi
 
 `agent-switcher` is a Go CLI tool designed to manage and switch AI models for various agents in the Opencode environment. It interacts with the `opencode` CLI and modifies agent configuration files.
 
-- **Language:** Go 1.22+
+- **Language:** Go 1.23+
 - **Entry Point:** `main.go`
 - **Module:** `agent-switcher`
 - **Dependencies:** `gopkg.in/yaml.v3` (only external dependency)

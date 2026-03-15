@@ -2,7 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/mario-gc/opencode-agent-switcher)](https://goreportcard.com/report/github.com/mario-gc/opencode-agent-switcher)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Go Version](https://img.shields.io/badge/Go-1.22+-00ADD8?logo=go)](https://golang.org/)
+[![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go)](https://golang.org/)
 
 A CLI tool for managing and switching AI models for Opencode agents.
 
@@ -16,7 +16,7 @@ A CLI tool for managing and switching AI models for Opencode agents.
 
 ## Prerequisites
 
-- **Go:** Version 1.22 or higher
+- **Go:** Version 1.23 or higher
 - **Opencode:** The `opencode` CLI tool must be installed and configured
 - **Configuration:** Expects `~/.config/opencode/opencode.json` and agent configurations in `~/.config/opencode/agents/`
 
