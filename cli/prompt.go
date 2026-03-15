@@ -8,13 +8,17 @@ import (
 	"opencode-agent-switcher/models"
 )
 
+const ExitChoice = "__EXIT__"
+const ContinueChoice = "__CONTINUE__"
+
 func PromptAgentSelection(agents []models.Agent) (int, error) {
 	var selectedName string
-	options := make([]huh.Option[string], len(agents))
+	options := make([]huh.Option[string], len(agents)+1)
 
+	options[0] = huh.NewOption("Exit", ExitChoice)
 	for i, agent := range agents {
 		display := fmt.Sprintf("%s (Current: %s)", agent.Name, agent.CurrentModel)
-		options[i] = huh.NewOption(display, agent.Name)
+		options[i+1] = huh.NewOption(display, agent.Name)
 	}
 
 	form := huh.NewForm(
@@ -29,6 +33,10 @@ func PromptAgentSelection(agents []models.Agent) (int, error) {
 
 	if err := form.Run(); err != nil {
 		return -1, err
+	}
+
+	if selectedName == ExitChoice {
+		return -2, nil
 	}
 
 	for i, agent := range agents {
@@ -89,4 +97,48 @@ func PromptConfirm(message string) (bool, error) {
 	}
 
 	return confirmed, nil
+}
+
+func PromptContinueOrExit() (bool, error) {
+	var choice string
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("What would you like to do?").
+				Options(
+					huh.NewOption("Continue (select another agent)", ContinueChoice),
+					huh.NewOption("Exit", ExitChoice),
+				).
+				Value(&choice),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return false, err
+	}
+
+	return choice == ContinueChoice, nil
+}
+
+func PromptUndo(message string) (bool, error) {
+	var choice string
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title(message).
+				Options(
+					huh.NewOption("Undo - restore previous model", "undo"),
+					huh.NewOption("Keep changes", "keep"),
+				).
+				Value(&choice),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return false, err
+	}
+
+	return choice == "undo", nil
 }
