@@ -107,43 +107,43 @@ description: Test agent
 ---
 # Test Agent Content`
 
-	if err := os.WriteFile(filepath.Join(tmpDir, "test-agent.md"), []byte(validAgent), 0644); err != nil {
-		t.Fatalf("Failed to write test file: %v", err)
+	if writeErr := os.WriteFile(filepath.Join(tmpDir, "test-agent.md"), []byte(validAgent), 0644); writeErr != nil {
+		t.Fatalf("Failed to write test file: %v", writeErr)
 	}
 
 	noModelAgent := `---
 description: No model here
 ---
 # Content`
-	if err := os.WriteFile(filepath.Join(tmpDir, "no-model.md"), []byte(noModelAgent), 0644); err != nil {
-		t.Fatalf("Failed to write test file: %v", err)
+	if writeErr := os.WriteFile(filepath.Join(tmpDir, "no-model.md"), []byte(noModelAgent), 0644); writeErr != nil {
+		t.Fatalf("Failed to write test file: %v", writeErr)
 	}
 
 	invalidFrontmatter := `# Just markdown content`
-	if err := os.WriteFile(filepath.Join(tmpDir, "invalid.md"), []byte(invalidFrontmatter), 0644); err != nil {
-		t.Fatalf("Failed to write test file: %v", err)
+	if writeErr := os.WriteFile(filepath.Join(tmpDir, "invalid.md"), []byte(invalidFrontmatter), 0644); writeErr != nil {
+		t.Fatalf("Failed to write test file: %v", writeErr)
 	}
 
 	txtFile := `some text content`
-	if err := os.WriteFile(filepath.Join(tmpDir, "readme.txt"), []byte(txtFile), 0644); err != nil {
-		t.Fatalf("Failed to write test file: %v", err)
+	if writeErr := os.WriteFile(filepath.Join(tmpDir, "readme.txt"), []byte(txtFile), 0644); writeErr != nil {
+		t.Fatalf("Failed to write test file: %v", writeErr)
 	}
 
-	agents, err := LoadAgents(tmpDir)
+	loadedAgents, err := LoadAgents(tmpDir)
 	if err != nil {
 		t.Fatalf("LoadAgents() error = %v", err)
 	}
 
-	if len(agents) != 1 {
-		t.Errorf("LoadAgents() returned %d agents, want 1", len(agents))
+	if len(loadedAgents) != 1 {
+		t.Errorf("LoadAgents() returned %d agents, want 1", len(loadedAgents))
 	}
 
-	if len(agents) > 0 {
-		if agents[0].Name != "test-agent" {
-			t.Errorf("Agent name = %q, want %q", agents[0].Name, "test-agent")
+	if len(loadedAgents) > 0 {
+		if loadedAgents[0].Name != "test-agent" {
+			t.Errorf("Agent name = %q, want %q", loadedAgents[0].Name, "test-agent")
 		}
-		if agents[0].CurrentModel != "openai/gpt-4" {
-			t.Errorf("Agent model = %q, want %q", agents[0].CurrentModel, "openai/gpt-4")
+		if loadedAgents[0].CurrentModel != "openai/gpt-4" {
+			t.Errorf("Agent model = %q, want %q", loadedAgents[0].CurrentModel, "openai/gpt-4")
 		}
 	}
 }
@@ -169,8 +169,8 @@ description: Test agent
 # Test Agent Content`
 
 	agentPath := filepath.Join(tmpDir, "test-agent.md")
-	if err := os.WriteFile(agentPath, []byte(agentContent), 0644); err != nil {
-		t.Fatalf("Failed to write test file: %v", err)
+	if writeErr := os.WriteFile(agentPath, []byte(agentContent), 0644); writeErr != nil {
+		t.Fatalf("Failed to write test file: %v", writeErr)
 	}
 
 	err = UpdateAgentModel(agentPath, "anthropic/claude-3-sonnet")
@@ -206,8 +206,8 @@ model: openai/gpt-4
 # Content`
 
 	agentPath := filepath.Join(tmpDir, "test-agent.md")
-	if err := os.WriteFile(agentPath, []byte(agentContent), 0644); err != nil {
-		t.Fatalf("Failed to write test file: %v", err)
+	if writeErr := os.WriteFile(agentPath, []byte(agentContent), 0644); writeErr != nil {
+		t.Fatalf("Failed to write test file: %v", writeErr)
 	}
 
 	err = UpdateAgentModel(agentPath, "")

@@ -12,11 +12,6 @@ import (
 	"opencode-agent-switcher/models"
 )
 
-var (
-	version = "dev"
-	commit  = "none"
-)
-
 func main() {
 	cfg, err := config.LoadOpencodeConfig()
 	if err != nil {
