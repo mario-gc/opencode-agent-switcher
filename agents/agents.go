@@ -4,23 +4,80 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
-	"agent-switcher/models"
+	"opencode-agent-switcher/models"
+
 	"gopkg.in/yaml.v3"
 )
 
-// LoadAgents reads all .md files from agents directory
+const maxFrontmatterSize = 64 * 1024
+
+var validSegment = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_\-\.]*$`)
+
+func ValidateModelID(modelID string) error {
+	if modelID == "" {
+		return fmt.Errorf("model ID cannot be empty")
+	}
+	if len(modelID) > 256 {
+		return fmt.Errorf("model ID exceeds maximum length")
+	}
+
+	segments := strings.Split(modelID, "/")
+	if len(segments) < 2 {
+		return fmt.Errorf("model ID must be in format 'provider/model'")
+	}
+
+	for _, segment := range segments {
+		if segment == "" {
+			return fmt.Errorf("model ID contains empty segment")
+		}
+		if !validSegment.MatchString(segment) {
+			return fmt.Errorf("invalid segment '%s': must start with alphanumeric and contain only alphanumeric, dash, underscore, or dot", segment)
+		}
+	}
+
+	return nil
+}
+
+func isPathWithinDir(path, dir string) (bool, error) {
+	absPath, err := filepath.Abs(path)
+	if err != nil {
+		return false, err
+	}
+	absDir, err := filepath.Abs(dir)
+	if err != nil {
+		return false, err
+	}
+	return strings.HasPrefix(absPath, absDir+string(filepath.Separator)), nil
+}
+
 func LoadAgents(agentsDir string) ([]models.Agent, error) {
+	absAgentsDir, err := filepath.Abs(agentsDir)
+	if err != nil {
+		return nil, fmt.Errorf("failed to resolve agents directory: %w", err)
+	}
+
 	files, err := os.ReadDir(agentsDir)
 	if err != nil {
 		return nil, err
 	}
 
-	var agents []models.Agent
+	var agentList []models.Agent
 	for _, file := range files {
+		if file.Type()&os.ModeSymlink != 0 {
+			continue
+		}
+
 		if filepath.Ext(file.Name()) == ".md" {
 			path := filepath.Join(agentsDir, file.Name())
+
+			isWithin, err := isPathWithinDir(path, absAgentsDir)
+			if err != nil || !isWithin {
+				continue
+			}
+
 			content, err := os.ReadFile(path)
 			if err != nil {
 				continue
@@ -36,9 +93,12 @@ func LoadAgents(agentsDir string) ([]models.Agent, error) {
 				continue
 			}
 
-			description, _ := frontmatter["description"].(string)
+			description, ok := frontmatter["description"].(string)
+			if !ok {
+				description = ""
+			}
 
-			agents = append(agents, models.Agent{
+			agentList = append(agentList, models.Agent{
 				Name:         strings.TrimSuffix(file.Name(), ".md"),
 				Path:         path,
 				CurrentModel: model,
@@ -47,10 +107,9 @@ func LoadAgents(agentsDir string) ([]models.Agent, error) {
 		}
 	}
 
-	return agents, nil
+	return agentList, nil
 }
 
-// ParseFrontmatter extracts YAML frontmatter from markdown content
 func ParseFrontmatter(content string) (map[string]interface{}, error) {
 	if !strings.HasPrefix(content, "---") {
 		return nil, fmt.Errorf("no frontmatter found")
@@ -61,16 +120,24 @@ func ParseFrontmatter(content string) (map[string]interface{}, error) {
 		return nil, fmt.Errorf("invalid frontmatter format")
 	}
 
+	frontmatterStr := parts[1]
+	if len(frontmatterStr) > maxFrontmatterSize {
+		return nil, fmt.Errorf("frontmatter exceeds maximum allowed size")
+	}
+
 	var frontmatter map[string]interface{}
-	if err := yaml.Unmarshal([]byte(parts[1]), &frontmatter); err != nil {
+	if err := yaml.Unmarshal([]byte(frontmatterStr), &frontmatter); err != nil {
 		return nil, err
 	}
 
 	return frontmatter, nil
 }
 
-// UpdateAgentModel modifies the model field in agent frontmatter
 func UpdateAgentModel(agentPath, newModel string) error {
+	if err := ValidateModelID(newModel); err != nil {
+		return fmt.Errorf("invalid model ID: %w", err)
+	}
+
 	content, err := os.ReadFile(agentPath)
 	if err != nil {
 		return err
@@ -82,7 +149,7 @@ func UpdateAgentModel(agentPath, newModel string) error {
 	}
 
 	var frontmatter map[string]interface{}
-	if err := yaml.Unmarshal([]byte(parts[1]), &frontmatter); err != nil {
+	if err = yaml.Unmarshal([]byte(parts[1]), &frontmatter); err != nil {
 		return err
 	}
 
@@ -94,5 +161,5 @@ func UpdateAgentModel(agentPath, newModel string) error {
 	}
 
 	newContent := fmt.Sprintf("---\n%s---%s", string(newFrontmatter), parts[2])
-	return os.WriteFile(agentPath, []byte(newContent), 0644)
+	return os.WriteFile(agentPath, []byte(newContent), 0600)
 }

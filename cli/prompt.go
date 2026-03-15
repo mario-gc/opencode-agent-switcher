@@ -1,58 +1,92 @@
 package cli
 
 import (
-	"bufio"
 	"fmt"
-	"strconv"
-	"strings"
 
-	"agent-switcher/models"
+	"github.com/charmbracelet/huh"
+
+	"opencode-agent-switcher/models"
 )
 
-// PromptAgentSelection presents interactive agent selection
-func PromptAgentSelection(reader *bufio.Reader, agents []models.Agent) (int, error) {
-	fmt.Println("\nAvailable Agents:")
-	fmt.Println("-----------------")
-	for i, agent := range agents {
-		fmt.Printf("%d. %s (Current: %s)\n", i+1, agent.Name, agent.CurrentModel)
-	}
-	fmt.Println("-----------------")
+func PromptAgentSelection(agents []models.Agent) (int, error) {
+	var selectedName string
+	options := make([]huh.Option[string], len(agents))
 
-	fmt.Print("Select an agent to update (enter number): ")
-	input, err := reader.ReadString('\n')
-	if err != nil {
+	for i, agent := range agents {
+		display := fmt.Sprintf("%s (Current: %s)", agent.Name, agent.CurrentModel)
+		options[i] = huh.NewOption(display, agent.Name)
+	}
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Select an agent to update").
+				Options(options...).
+				Value(&selectedName).
+				Height(10),
+		),
+	)
+
+	if err := form.Run(); err != nil {
 		return -1, err
 	}
 
-	input = strings.TrimSpace(input)
-	selection, err := strconv.Atoi(input)
-	if err != nil || selection < 1 || selection > len(agents) {
-		return -1, fmt.Errorf("invalid selection")
+	for i, agent := range agents {
+		if agent.Name == selectedName {
+			return i, nil
+		}
 	}
 
-	return selection - 1, nil
+	return -1, fmt.Errorf("selected agent not found")
 }
 
-// PromptModelSelection presents interactive model selection
-func PromptModelSelection(reader *bufio.Reader, models []models.ModelOption) (int, error) {
-	fmt.Println("\nAvailable Models:")
-	fmt.Println("-----------------")
-	for i, model := range models {
-		fmt.Printf("%d. %s\n", i+1, model.Display)
-	}
-	fmt.Println("-----------------")
+func PromptModelSelection(modelOptions []models.ModelOption) (int, error) {
+	var selectedID string
+	options := make([]huh.Option[string], len(modelOptions))
 
-	fmt.Print("Select a new model (enter number): ")
-	input, err := reader.ReadString('\n')
-	if err != nil {
+	for i, model := range modelOptions {
+		options[i] = huh.NewOption(model.Display, model.ID)
+	}
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Select a new model").
+				Options(options...).
+				Value(&selectedID).
+				Height(15),
+		),
+	)
+
+	if err := form.Run(); err != nil {
 		return -1, err
 	}
 
-	input = strings.TrimSpace(input)
-	selection, err := strconv.Atoi(input)
-	if err != nil || selection < 1 || selection > len(models) {
-		return -1, fmt.Errorf("invalid selection")
+	for i, model := range modelOptions {
+		if model.ID == selectedID {
+			return i, nil
+		}
 	}
 
-	return selection - 1, nil
+	return -1, fmt.Errorf("selected model not found")
+}
+
+func PromptConfirm(message string) (bool, error) {
+	var confirmed bool
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewConfirm().
+				Title(message).
+				Value(&confirmed).
+				Affirmative("Yes").
+				Negative("No"),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return false, err
+	}
+
+	return confirmed, nil
 }

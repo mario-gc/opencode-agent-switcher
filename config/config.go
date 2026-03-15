@@ -6,12 +6,33 @@ import (
 	"os"
 	"os/exec"
 	"path/filepath"
+	"regexp"
 	"strings"
 
-	"agent-switcher/models"
+	"opencode-agent-switcher/models"
 )
 
-// LoadOpencodeConfig reads and parses ~/.config/opencode/opencode.json
+var validSegmentPattern = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_\-\.]*$`)
+
+func isValidModelID(modelID string) bool {
+	if modelID == "" || len(modelID) > 256 {
+		return false
+	}
+
+	segments := strings.Split(modelID, "/")
+	if len(segments) < 2 {
+		return false
+	}
+
+	for _, segment := range segments {
+		if segment == "" || !validSegmentPattern.MatchString(segment) {
+			return false
+		}
+	}
+
+	return true
+}
+
 func LoadOpencodeConfig() (*models.OpencodeConfig, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -24,26 +45,30 @@ func LoadOpencodeConfig() (*models.OpencodeConfig, error) {
 		return nil, err
 	}
 
-	var config models.OpencodeConfig
-	if err := json.Unmarshal(data, &config); err != nil {
+	var cfg models.OpencodeConfig
+	if err := json.Unmarshal(data, &cfg); err != nil {
 		return nil, err
 	}
 
-	return &config, nil
+	return &cfg, nil
 }
 
-// GetAvailableModels extracts all model IDs from providers
-func GetAvailableModels(config *models.OpencodeConfig) []models.ModelOption {
+func GetAvailableModels(cfg *models.OpencodeConfig) []models.ModelOption {
 	var options []models.ModelOption
 
-	for providerID, provider := range config.Provider {
+	for providerID, provider := range cfg.Provider {
 		for modelID, model := range provider.Models {
-			display := fmt.Sprintf("%s/%s", providerID, modelID)
+			modelIDFull := fmt.Sprintf("%s/%s", providerID, modelID)
+			if !isValidModelID(modelIDFull) {
+				continue
+			}
+
+			display := modelIDFull
 			if model.Name != "" {
 				display = fmt.Sprintf("%s (%s)", display, model.Name)
 			}
 			options = append(options, models.ModelOption{
-				ID:       fmt.Sprintf("%s/%s", providerID, modelID),
+				ID:       modelIDFull,
 				Display:  display,
 				Provider: providerID,
 			})
@@ -53,7 +78,6 @@ func GetAvailableModels(config *models.OpencodeConfig) []models.ModelOption {
 	return options
 }
 
-// GetModelsFromCLI runs `opencode models` and parses output
 func GetModelsFromCLI() ([]models.ModelOption, error) {
 	cmd := exec.Command("opencode", "models")
 	output, err := cmd.Output()
@@ -69,11 +93,9 @@ func GetModelsFromCLI() ([]models.ModelOption, error) {
 			continue
 		}
 
-		// Parse line format: provider/model
 		parts := strings.Split(line, "/")
-		if len(parts) >= 2 {
+		if len(parts) >= 2 && isValidModelID(line) {
 			provider := parts[0]
-			_ = strings.Join(parts[1:], "/") // model part not needed but kept for clarity
 			options = append(options, models.ModelOption{
 				ID:       line,
 				Display:  line,
