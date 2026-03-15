@@ -12,6 +12,8 @@ A CLI tool for managing and switching AI models for Opencode agents.
 - **Model Discovery:** Fetches available AI models from the `opencode` CLI or falls back to the configuration file
 - **Interactive TUI:** Beautiful terminal user interface using [Huh?](https://github.com/charmbracelet/huh) for selection
 - **Batch Updates:** Detects if multiple agents are using the same model and offers to update them all simultaneously
+- **Undo Support:** After updating, you can undo changes and restore previous models
+- **Continuous Operation:** Loop back to main menu to update more agents, or exit when done
 - **Configuration Management:** Safely updates the YAML configuration files for the agents
 
 ## Prerequisites
@@ -54,12 +56,18 @@ opencode-agent-switcher
 ### Workflow
 
 1. The tool loads your Opencode configuration and available agents
-2. An interactive menu appears showing all available agents with their current models
+2. An interactive menu appears with:
+   - All available agents with their current models
+   - An "Exit" option to quit the application
 3. Use arrow keys to navigate and Enter to select an agent
 4. A second menu appears with all available models
 5. Select the new model you wish to assign to the agent
 6. If other agents use the same model, you'll be asked if you want to update them too
 7. The tool updates the agent configuration files and shows confirmation
+8. After updating, you can:
+   - **Undo:** Restore the previous model settings
+   - **Continue:** Go back to the main menu to update another agent
+   - **Exit:** Quit the application
 
 ## Development
 
@@ -67,7 +75,7 @@ opencode-agent-switcher
 
 ```
 .
-├── main.go              # Entry point
+├── main.go              # Entry point with main loop
 ├── cli/                 # User interaction and TUI prompts
 │   └── prompt.go        # Huh? based interactive prompts
 ├── config/              # Configuration loading and parsing
