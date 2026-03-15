@@ -44,18 +44,19 @@ func main() {
 	}
 
 	for {
-		shouldContinue, err := runAgentUpdate(agentList, modelOptions)
-		if err != nil {
-			log.Fatalf("Error: %v", err)
+		shouldContinue, loopErr := runAgentUpdate(agentList, modelOptions)
+		if loopErr != nil {
+			log.Fatalf("Error: %v", loopErr)
 		}
 
 		if !shouldContinue {
 			break
 		}
 
-		agentList, err = agents.LoadAgents(agentsDir)
-		if err != nil {
-			log.Fatalf("Failed to reload agents: %v", err)
+		var reloadErr error
+		agentList, reloadErr = agents.LoadAgents(agentsDir)
+		if reloadErr != nil {
+			log.Fatalf("Failed to reload agents: %v", reloadErr)
 		}
 	}
 
@@ -93,9 +94,9 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption)
 
 	if len(otherAgents) > 0 {
 		message := fmt.Sprintf("%d other agent(s) use the same model. Update all?", len(otherAgents))
-		confirmed, err := cli.PromptConfirm(message)
-		if err != nil {
-			return false, err
+		confirmed, confirmErr := cli.PromptConfirm(message)
+		if confirmErr != nil {
+			return false, confirmErr
 		}
 		if confirmed {
 			for _, a := range otherAgents {
@@ -109,9 +110,9 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption)
 
 	updatedAgents := []string{}
 	for _, agent := range agentsToUpdate {
-		err := agents.UpdateAgentModel(agent.Path, selectedModel.ID)
-		if err != nil {
-			log.Printf("Failed to update agent %s: %v", agent.Name, err)
+		updateErr := agents.UpdateAgentModel(agent.Path, selectedModel.ID)
+		if updateErr != nil {
+			log.Printf("Failed to update agent %s: %v", agent.Name, updateErr)
 		} else {
 			fmt.Printf("✓ Updated %s\n", agent.Name)
 			updatedAgents = append(updatedAgents, agent.Name)
@@ -120,9 +121,9 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption)
 
 	if len(updatedAgents) > 0 {
 		undoMessage := fmt.Sprintf("Updated %d agent(s). Undo changes?", len(updatedAgents))
-		wantUndo, err := cli.PromptUndo(undoMessage)
-		if err != nil {
-			return false, err
+		wantUndo, undoErr := cli.PromptUndo(undoMessage)
+		if undoErr != nil {
+			return false, undoErr
 		}
 
 		if wantUndo {
@@ -131,9 +132,9 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption)
 				for _, agent := range agentsToUpdate {
 					if agent.Name == agentName {
 						previousModel := previousModels[agentName]
-						err := agents.UpdateAgentModel(agent.Path, previousModel)
-						if err != nil {
-							log.Printf("Failed to undo agent %s: %v", agentName, err)
+						restoreErr := agents.UpdateAgentModel(agent.Path, previousModel)
+						if restoreErr != nil {
+							log.Printf("Failed to undo agent %s: %v", agentName, restoreErr)
 						} else {
 							fmt.Printf("✓ Restored %s to %s\n", agentName, previousModel)
 						}
