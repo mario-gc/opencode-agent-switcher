@@ -7,6 +7,29 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2026-03-19
+
+### Added
+- **Mode switching**: Change agent mode (primary/subagent/all) in addition to model
+- **Custom model input**: Enter custom model ID directly instead of selecting from list
+- **Multi-source agent discovery**: Load agents from all configuration sources
+  - Global markdown: `~/.config/opencode/agents/*.md`
+  - Global JSON: `~/.config/opencode/opencode.json`
+  - Project markdown: `.opencode/agents/*.md`
+  - Project JSON: `./opencode.json`
+- **Source indicators**: Agents display their source location (e.g., `[g/md]`, `[p/json]`)
+- **Action selection menu**: Choose between "Change Model" or "Change Mode" after selecting agent
+- **Mode field prompt**: Ask user whether to add mode field when agent has none set
+
+### Changed
+- Refactored agent loading to support multiple configuration sources
+- Updated agent display to show mode information in selection list
+- `UpdateAgentModel` now requires agent name as parameter for JSON config support
+- Project configs take precedence over global configs for same agent name
+
+### Fixed
+- Proper handling of agents without mode field (defaults to "all")
+
 ## [0.3.0] - 2026-03-15
 
 ### Added
@@ -57,7 +80,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - YAML frontmatter parsing for agent configuration files
 - MIT License
 
-[Unreleased]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.3.0...HEAD
+[Unreleased]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.4.0...HEAD
+[0.4.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.2.0...v0.3.0
 [0.2.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.1.0...v0.2.0
 [0.1.0]: https://github.com/mario-gc/opencode-agent-switcher/releases/tag/v0.1.0

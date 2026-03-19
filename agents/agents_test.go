@@ -173,7 +173,7 @@ description: Test agent
 		t.Fatalf("Failed to write test file: %v", writeErr)
 	}
 
-	err = UpdateAgentModel(agentPath, "anthropic/claude-3-sonnet")
+	err = UpdateAgentModel(agentPath, "test-agent", "anthropic/claude-3-sonnet")
 	if err != nil {
 		t.Fatalf("UpdateAgentModel() error = %v", err)
 	}
@@ -210,7 +210,7 @@ model: openai/gpt-4
 		t.Fatalf("Failed to write test file: %v", writeErr)
 	}
 
-	err = UpdateAgentModel(agentPath, "")
+	err = UpdateAgentModel(agentPath, "test-agent", "")
 	if err == nil {
 		t.Error("UpdateAgentModel() should return error for empty model ID")
 	}
@@ -240,5 +240,136 @@ func TestIsPathWithinDir(t *testing.T) {
 				t.Errorf("isPathWithinDir() = %v, want %v", got, tt.want)
 			}
 		})
+	}
+}
+
+func TestUpdateAgentMode(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "agent_mode_test")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	agentContent := `---
+model: openai/gpt-4
+description: Test agent
+---
+# Test Agent Content`
+
+	agentPath := filepath.Join(tmpDir, "test-agent.md")
+	if writeErr := os.WriteFile(agentPath, []byte(agentContent), 0644); writeErr != nil {
+		t.Fatalf("Failed to write test file: %v", writeErr)
+	}
+
+	err = UpdateAgentMode(agentPath, "test-agent", "primary")
+	if err != nil {
+		t.Fatalf("UpdateAgentMode() error = %v", err)
+	}
+
+	content, err := os.ReadFile(agentPath)
+	if err != nil {
+		t.Fatalf("Failed to read updated file: %v", err)
+	}
+
+	frontmatter, err := ParseFrontmatter(string(content))
+	if err != nil {
+		t.Fatalf("Failed to parse updated frontmatter: %v", err)
+	}
+
+	if frontmatter["mode"] != "primary" {
+		t.Errorf("Updated mode = %v, want %q", frontmatter["mode"], "primary")
+	}
+}
+
+func TestUpdateAgentModeInvalid(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "agent_mode_invalid_test")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	agentContent := `---
+model: openai/gpt-4
+---
+# Content`
+
+	agentPath := filepath.Join(tmpDir, "test-agent.md")
+	if writeErr := os.WriteFile(agentPath, []byte(agentContent), 0644); writeErr != nil {
+		t.Fatalf("Failed to write test file: %v", writeErr)
+	}
+
+	err = UpdateAgentMode(agentPath, "test-agent", "invalid")
+	if err == nil {
+		t.Error("UpdateAgentMode() should return error for invalid mode")
+	}
+}
+
+func TestIsValidMode(t *testing.T) {
+	tests := []struct {
+		mode string
+		want bool
+	}{
+		{"", true},
+		{"primary", true},
+		{"subagent", true},
+		{"all", true},
+		{"invalid", false},
+		{"Primary", false},
+	}
+
+	for _, tt := range tests {
+		t.Run(tt.mode, func(t *testing.T) {
+			if got := isValidMode(tt.mode); got != tt.want {
+				t.Errorf("isValidMode(%q) = %v, want %v", tt.mode, got, tt.want)
+			}
+		})
+	}
+}
+
+func TestLoadAgentsWithMode(t *testing.T) {
+	tmpDir, err := os.MkdirTemp("", "agents_mode_test")
+	if err != nil {
+		t.Fatalf("Failed to create temp dir: %v", err)
+	}
+	defer os.RemoveAll(tmpDir)
+
+	agentWithMode := `---
+model: openai/gpt-4
+description: Agent with mode
+mode: subagent
+---
+# Content`
+
+	agentWithoutMode := `---
+model: anthropic/claude-3
+description: Agent without mode
+---
+# Content`
+
+	if writeErr := os.WriteFile(filepath.Join(tmpDir, "with-mode.md"), []byte(agentWithMode), 0644); writeErr != nil {
+		t.Fatalf("Failed to write test file: %v", writeErr)
+	}
+
+	if writeErr := os.WriteFile(filepath.Join(tmpDir, "without-mode.md"), []byte(agentWithoutMode), 0644); writeErr != nil {
+		t.Fatalf("Failed to write test file: %v", writeErr)
+	}
+
+	loadedAgents, err := LoadAgents(tmpDir)
+	if err != nil {
+		t.Fatalf("LoadAgents() error = %v", err)
+	}
+
+	if len(loadedAgents) != 2 {
+		t.Errorf("LoadAgents() returned %d agents, want 2", len(loadedAgents))
+		return
+	}
+
+	for _, agent := range loadedAgents {
+		if agent.Name == "with-mode" && agent.Mode != "subagent" {
+			t.Errorf("Agent 'with-mode' has mode %q, want %q", agent.Mode, "subagent")
+		}
+		if agent.Name == "without-mode" && agent.Mode != "" {
+			t.Errorf("Agent 'without-mode' has mode %q, want empty", agent.Mode)
+		}
 	}
 }

@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 
+	"opencode-agent-switcher/config"
 	"opencode-agent-switcher/models"
 
 	"gopkg.in/yaml.v3"
@@ -41,6 +42,10 @@ func ValidateModelID(modelID string) error {
 	return nil
 }
 
+func isValidMode(mode string) bool {
+	return mode == "" || mode == "primary" || mode == "subagent" || mode == "all"
+}
+
 func isPathWithinDir(path, dir string) (bool, error) {
 	absPath, err := filepath.Abs(path)
 	if err != nil {
@@ -53,7 +58,67 @@ func isPathWithinDir(path, dir string) (bool, error) {
 	return strings.HasPrefix(absPath, absDir+string(filepath.Separator)), nil
 }
 
+func LoadAllAgents() ([]models.Agent, error) {
+	agentMap := make(map[string]models.Agent)
+
+	globalAgentsDir, err := getGlobalAgentsDir()
+	if err == nil {
+		globalMD, err := LoadAgentsFromDir(globalAgentsDir, models.SourceGlobal, models.FormatMarkdown)
+		if err == nil {
+			for _, agent := range globalMD {
+				agentMap[agent.Name] = agent
+			}
+		}
+	}
+
+	globalCfg, err := config.LoadGlobalConfig()
+	if err == nil {
+		globalJSON := config.GetAgentsFromConfig(globalCfg, models.SourceGlobal, models.FormatJSON)
+		for _, agent := range globalJSON {
+			agentMap[agent.Name] = agent
+		}
+	}
+
+	projectMD, err := LoadAgentsFromDir(getProjectAgentsDir(), models.SourceProject, models.FormatMarkdown)
+	if err == nil {
+		for _, agent := range projectMD {
+			agentMap[agent.Name] = agent
+		}
+	}
+
+	projectCfg, err := config.LoadProjectConfig()
+	if err == nil && projectCfg != nil {
+		projectJSON := config.GetAgentsFromConfig(projectCfg, models.SourceProject, models.FormatJSON)
+		for _, agent := range projectJSON {
+			agentMap[agent.Name] = agent
+		}
+	}
+
+	var agentList []models.Agent
+	for _, agent := range agentMap {
+		agentList = append(agentList, agent)
+	}
+
+	return agentList, nil
+}
+
+func getGlobalAgentsDir() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, ".config", "opencode", "agents"), nil
+}
+
+func getProjectAgentsDir() string {
+	return filepath.Join(".", ".opencode", "agents")
+}
+
 func LoadAgents(agentsDir string) ([]models.Agent, error) {
+	return LoadAgentsFromDir(agentsDir, models.SourceGlobal, models.FormatMarkdown)
+}
+
+func LoadAgentsFromDir(agentsDir, location, format string) ([]models.Agent, error) {
 	absAgentsDir, err := filepath.Abs(agentsDir)
 	if err != nil {
 		return nil, fmt.Errorf("failed to resolve agents directory: %w", err)
@@ -98,11 +163,21 @@ func LoadAgents(agentsDir string) ([]models.Agent, error) {
 				description = ""
 			}
 
+			mode, ok := frontmatter["mode"].(string)
+			if !ok || !isValidMode(mode) {
+				mode = ""
+			}
+
 			agentList = append(agentList, models.Agent{
 				Name:         strings.TrimSuffix(file.Name(), ".md"),
 				Path:         path,
 				CurrentModel: model,
 				Description:  description,
+				Mode:         mode,
+				Source: models.AgentSource{
+					Location: location,
+					Format:   format,
+				},
 			})
 		}
 	}
@@ -133,11 +208,57 @@ func ParseFrontmatter(content string) (map[string]interface{}, error) {
 	return frontmatter, nil
 }
 
-func UpdateAgentModel(agentPath, newModel string) error {
+func UpdateAgentModel(agentPath, agentName, newModel string) error {
 	if err := ValidateModelID(newModel); err != nil {
 		return fmt.Errorf("invalid model ID: %w", err)
 	}
 
+	if strings.HasPrefix(agentPath, "json:") {
+		location := strings.TrimPrefix(agentPath, "json:")
+		var configPath string
+		if location == models.SourceGlobal {
+			var err error
+			configPath, err = config.GetGlobalConfigPath()
+			if err != nil {
+				return err
+			}
+		} else {
+			configPath = config.GetProjectConfigPath()
+		}
+		return updateAgentFieldInJSON(configPath, agentName, "model", newModel)
+	}
+
+	return updateAgentFieldInMarkdown(agentPath, "model", newModel)
+}
+
+func UpdateAgentMode(agentPath, agentName, newMode string) error {
+	if !isValidMode(newMode) {
+		return fmt.Errorf("invalid mode: must be 'primary', 'subagent', or 'all'")
+	}
+
+	if strings.HasPrefix(agentPath, "json:") {
+		location := strings.TrimPrefix(agentPath, "json:")
+		var configPath string
+		if location == models.SourceGlobal {
+			var err error
+			configPath, err = config.GetGlobalConfigPath()
+			if err != nil {
+				return err
+			}
+		} else {
+			configPath = config.GetProjectConfigPath()
+		}
+		return updateAgentFieldInJSON(configPath, agentName, "mode", newMode)
+	}
+
+	return updateAgentFieldInMarkdown(agentPath, "mode", newMode)
+}
+
+func updateAgentFieldInJSON(configPath, agentName, field, value string) error {
+	return config.UpdateAgentInJSON(configPath, agentName, field, value)
+}
+
+func updateAgentFieldInMarkdown(agentPath, field, value string) error {
 	content, err := os.ReadFile(agentPath)
 	if err != nil {
 		return err
@@ -153,7 +274,7 @@ func UpdateAgentModel(agentPath, newModel string) error {
 		return err
 	}
 
-	frontmatter["model"] = newModel
+	frontmatter[field] = value
 
 	newFrontmatter, err := yaml.Marshal(frontmatter)
 	if err != nil {

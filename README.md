@@ -4,23 +4,27 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go)](https://golang.org/)
 
-A CLI tool for managing and switching AI models for Opencode agents.
+A CLI tool for managing and switching AI models and modes for Opencode agents.
 
 ## Features
 
-- **Agent Discovery:** Automatically detects available agents configured in `~/.config/opencode/agents/`
-- **Model Discovery:** Fetches available AI models from the `opencode` CLI or falls back to the configuration file
-- **Interactive TUI:** Beautiful terminal user interface using [Huh?](https://github.com/charmbracelet/huh) for selection
-- **Batch Updates:** Detects if multiple agents are using the same model and offers to update them all simultaneously
-- **Undo Support:** After updating, you can undo changes and restore previous models
-- **Continuous Operation:** Loop back to main menu to update more agents, or exit when done
-- **Configuration Management:** Safely updates the YAML configuration files for the agents
+- **Agent Discovery:** Automatically detects available agents from multiple sources:
+  - Global markdown: `~/.config/opencode/agents/*.md`
+  - Global JSON: `~/.config/opencode/opencode.json`
+  - Project markdown: `.opencode/agents/*.md`
+  - Project JSON: `./opencode.json`
+- **Model Switching:** Change the AI model assigned to any agent
+- **Mode Switching:** Change agent mode (primary/subagent/all)
+- **Custom Model Input:** Enter custom model IDs directly (format: `provider/model`)
+- **Interactive TUI:** Beautiful terminal user interface using [Huh?](https://github.com/charmbracelet/huh)
+- **Batch Updates:** Detects if multiple agents use the same model and offers to update them all
+- **Undo Support:** Restore previous settings after updates
+- **Source Indicators:** See where each agent is defined (global/project, markdown/JSON)
 
 ## Prerequisites
 
 - **Go:** Version 1.23 or higher
 - **Opencode:** The `opencode` CLI tool must be installed and configured
-- **Configuration:** Expects `~/.config/opencode/opencode.json` and agent configurations in `~/.config/opencode/agents/`
 
 ## Installation
 
@@ -55,19 +59,30 @@ opencode-agent-switcher
 
 ### Workflow
 
-1. The tool loads your Opencode configuration and available agents
+1. The tool loads your Opencode configuration and available agents from all sources
 2. An interactive menu appears with:
-   - All available agents with their current models
+   - All available agents with their current model, mode, and source
    - An "Exit" option to quit the application
-3. Use arrow keys to navigate and Enter to select an agent
-4. A second menu appears with all available models
-5. Select the new model you wish to assign to the agent
-6. If other agents use the same model, you'll be asked if you want to update them too
-7. The tool updates the agent configuration files and shows confirmation
-8. After updating, you can:
-   - **Undo:** Restore the previous model settings
-   - **Continue:** Go back to the main menu to update another agent
-   - **Exit:** Quit the application
+3. Select an agent to modify
+4. Choose an action:
+   - **Change Model** - Select a new AI model or enter a custom one
+   - **Change Mode** - Switch between primary/subagent/all modes
+   - **Back** - Return to agent selection
+5. If changing mode and the agent has no mode set, choose whether to add the field
+6. If other agents use the same model, you'll be asked to update them all
+7. After updating, you can undo changes or continue
+
+### Source Indicators
+
+Agents are tagged with their source location:
+- `[g/md]` - Global markdown file
+- `[g/json]` - Global JSON config
+- `[p/md]` - Project markdown file
+- `[p/json]` - Project JSON config
+
+### Configuration Precedence
+
+When agents have the same name in different sources, project-level configurations take precedence over global ones.
 
 ## Development
 

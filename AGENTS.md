@@ -4,7 +4,7 @@ This document provides instructions and guidelines for AI agents operating withi
 
 ## 1. Project Overview
 
-`opencode-agent-switcher` is a Go CLI tool designed to manage and switch AI models for various agents in the Opencode environment. It interacts with the `opencode` CLI and modifies agent configuration files.
+`opencode-agent-switcher` is a Go CLI tool designed to manage and switch AI models and modes for various agents in the Opencode environment. It interacts with the `opencode` CLI and modifies agent configuration files.
 
 - **Language:** Go 1.23+
 - **Entry Point:** `main.go`
@@ -115,9 +115,14 @@ type Provider struct {
 
 ## 4. Architecture Patterns
 
-### Configuration Location
-- Global config: `~/.config/opencode/opencode.json`
-- Agent configs: `~/.config/opencode/agents/*.md`
+### Configuration Sources
+The tool loads agents from multiple sources (in order of precedence):
+1. **Project JSON:** `./opencode.json` (highest precedence)
+2. **Project Markdown:** `.opencode/agents/*.md`
+3. **Global JSON:** `~/.config/opencode/opencode.json`
+4. **Global Markdown:** `~/.config/opencode/agents/*.md`
+
+Project configurations override global ones for agents with the same name.
 
 ### Agent File Format
 Agent files are Markdown with YAML frontmatter:
@@ -125,15 +130,35 @@ Agent files are Markdown with YAML frontmatter:
 ---
 model: provider/model-id
 description: Agent description
+mode: primary  # optional: primary, subagent, or all
 ---
 # Agent instructions here
 ```
 
+### JSON Config Format
+Agents can also be defined in `opencode.json`:
+```json
+{
+  "agent": {
+    "my-agent": {
+      "description": "Agent description",
+      "model": "provider/model-id",
+      "mode": "subagent"
+    }
+  }
+}
+```
+
 ### TUI Interaction (Huh? Library)
 The tool uses `github.com/charmbracelet/huh` for interactive prompts:
-- `PromptAgentSelection()` - Select from agent list
-- `PromptModelSelection()` - Select from model list
+- `PromptAgentSelection()` - Select from agent list with source indicators
+- `PromptActionSelection()` - Choose action (Change Model / Change Mode / Back)
+- `PromptModelSelection()` - Select from model list with custom input option
+- `PromptModeSelection()` - Select mode (primary/subagent/all)
+- `PromptCustomModelInput()` - Enter custom model ID
+- `PromptAddModeField()` - Ask whether to add mode field
 - `PromptConfirm()` - Yes/No confirmation
+- `PromptUndo()` - Undo changes confirmation
 
 ### External CLI Dependency
 - Tool calls `opencode models` to fetch available models
