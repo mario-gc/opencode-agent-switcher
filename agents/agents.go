@@ -63,8 +63,8 @@ func LoadAllAgents() ([]models.Agent, error) {
 
 	globalAgentsDir, err := getGlobalAgentsDir()
 	if err == nil {
-		globalMD, err := LoadAgentsFromDir(globalAgentsDir, models.SourceGlobal, models.FormatMarkdown)
-		if err == nil {
+		globalMD, loadErr := LoadAgentsFromDir(globalAgentsDir, models.SourceGlobal, models.FormatMarkdown)
+		if loadErr == nil {
 			for _, agent := range globalMD {
 				agentMap[agent.Name] = agent
 			}

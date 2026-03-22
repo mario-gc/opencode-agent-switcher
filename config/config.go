@@ -164,8 +164,8 @@ func UpdateAgentInJSON(configPath, agentName, field, value string) error {
 	}
 
 	var cfg map[string]interface{}
-	if err := json.Unmarshal(data, &cfg); err != nil {
-		return err
+	if unmarshalErr := json.Unmarshal(data, &cfg); unmarshalErr != nil {
+		return unmarshalErr
 	}
 
 	agents, ok := cfg["agent"].(map[string]interface{})

@@ -115,7 +115,7 @@ func handleModelChange(selectedAgent models.Agent, agentList []models.Agent, mod
 			fmt.Printf("Invalid model ID: %v\n", err)
 			return true, nil
 		}
-		selectedModel = models.ModelOption{ID: customID, Display: customID}
+		selectedModel = models.ModelOption{ID: customID}
 	} else {
 		for _, m := range modelOptions {
 			if m.ID == selectedModelID {
