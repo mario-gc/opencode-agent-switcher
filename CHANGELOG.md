@@ -7,7 +7,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-## [0.4.0] - 2026-03-19
+## [0.4.0] - 2026-03-22
 
 ### Added
 - **Mode switching**: Change agent mode (primary/subagent/all) in addition to model
@@ -29,6 +29,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 - Proper handling of agents without mode field (defaults to "all")
+- Return to agent selection menu after completing changes (instead of action menu)
 
 ## [0.3.0] - 2026-03-15
 
