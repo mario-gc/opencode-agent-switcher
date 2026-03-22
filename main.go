@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
 
 	"opencode-agent-switcher/agents"
 	"opencode-agent-switcher/cli"
@@ -79,48 +78,21 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption)
 		}
 
 		if action == cli.ActionModel {
-			shouldContinue, err := handleModelChange(selectedAgent, agentList, modelOptions)
+			continueToMenu, err := handleModelChange(selectedAgent, agentList, modelOptions)
 			if err != nil {
 				return false, err
 			}
-			if shouldContinue {
-				selectedAgent, err = reloadAgent(selectedAgent.Name)
-				if err != nil {
-					return false, err
-				}
-				continue
-			}
-			return true, nil
+			return continueToMenu, nil
 		}
 
 		if action == cli.ActionMode {
-			shouldContinue, err := handleModeChange(selectedAgent)
+			continueToMenu, err := handleModeChange(selectedAgent)
 			if err != nil {
 				return false, err
 			}
-			if shouldContinue {
-				selectedAgent, err = reloadAgent(selectedAgent.Name)
-				if err != nil {
-					return false, err
-				}
-				continue
-			}
-			return true, nil
+			return continueToMenu, nil
 		}
 	}
-}
-
-func reloadAgent(name string) (models.Agent, error) {
-	agentList, err := agents.LoadAllAgents()
-	if err != nil {
-		return models.Agent{}, err
-	}
-	for _, a := range agentList {
-		if a.Name == name {
-			return a, nil
-		}
-	}
-	return models.Agent{}, fmt.Errorf("agent %s not found after reload", name)
 }
 
 func handleModelChange(selectedAgent models.Agent, agentList []models.Agent, modelOptions []models.ModelOption) (bool, error) {
@@ -288,12 +260,4 @@ func promptContinue() (bool, error) {
 		return false, err
 	}
 	return continueChoice, nil
-}
-
-func getHomeDir() string {
-	home, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatalf("Failed to get user home dir: %v", err)
-	}
-	return home
 }
