@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"os"
-	"path/filepath"
 
 	"opencode-agent-switcher/agents"
 	"opencode-agent-switcher/cli"
@@ -13,24 +11,18 @@ import (
 )
 
 func main() {
-	cfg, err := config.LoadOpencodeConfig()
+	cfg, err := config.LoadGlobalConfig()
 	if err != nil {
-		log.Fatalf("Failed to load opencode config: %v", err)
+		fmt.Printf("Warning: Failed to load global opencode config: %v\n", err)
 	}
 
-	home, err := os.UserHomeDir()
-	if err != nil {
-		log.Fatalf("Failed to get user home dir: %v", err)
-	}
-	agentsDir := filepath.Join(home, ".config", "opencode", "agents")
-
-	agentList, err := agents.LoadAgents(agentsDir)
+	agentList, err := agents.LoadAllAgents()
 	if err != nil {
 		log.Fatalf("Failed to load agents: %v", err)
 	}
 
 	if len(agentList) == 0 {
-		log.Fatalf("No agents found in %s", agentsDir)
+		log.Fatalf("No agents found")
 	}
 
 	modelOptions, err := config.GetModelsFromCLI()
@@ -54,7 +46,7 @@ func main() {
 		}
 
 		var reloadErr error
-		agentList, reloadErr = agents.LoadAgents(agentsDir)
+		agentList, reloadErr = agents.LoadAllAgents()
 		if reloadErr != nil {
 			log.Fatalf("Failed to reload agents: %v", reloadErr)
 		}
@@ -75,11 +67,63 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption)
 
 	selectedAgent := agentList[agentIndex]
 
-	modelIndex, err := cli.PromptModelSelection(modelOptions)
+	for {
+		action, err := cli.PromptActionSelection(selectedAgent.CurrentModel, selectedAgent.Mode)
+		if err != nil {
+			return false, err
+		}
+
+		if action == cli.BackChoice {
+			return true, nil
+		}
+
+		if action == cli.ActionModel {
+			continueToMenu, err := handleModelChange(selectedAgent, agentList, modelOptions)
+			if err != nil {
+				return false, err
+			}
+			return continueToMenu, nil
+		}
+
+		if action == cli.ActionMode {
+			continueToMenu, err := handleModeChange(selectedAgent)
+			if err != nil {
+				return false, err
+			}
+			return continueToMenu, nil
+		}
+	}
+}
+
+func handleModelChange(selectedAgent models.Agent, agentList []models.Agent, modelOptions []models.ModelOption) (bool, error) {
+	selectedModelID, err := cli.PromptModelSelection(modelOptions)
 	if err != nil {
 		return false, err
 	}
-	selectedModel := modelOptions[modelIndex]
+
+	if selectedModelID == cli.BackChoice {
+		return true, nil
+	}
+
+	var selectedModel models.ModelOption
+	if selectedModelID == cli.CustomModelChoice {
+		customID, err := cli.PromptCustomModelInput()
+		if err != nil {
+			return false, err
+		}
+		if err := agents.ValidateModelID(customID); err != nil {
+			fmt.Printf("Invalid model ID: %v\n", err)
+			return true, nil
+		}
+		selectedModel = models.ModelOption{ID: customID, Display: customID}
+	} else {
+		for _, m := range modelOptions {
+			if m.ID == selectedModelID {
+				selectedModel = m
+				break
+			}
+		}
+	}
 
 	agentsToUpdate := []models.Agent{selectedAgent}
 	previousModels := make(map[string]string)
@@ -110,7 +154,7 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption)
 
 	updatedAgents := []string{}
 	for _, agent := range agentsToUpdate {
-		updateErr := agents.UpdateAgentModel(agent.Path, selectedModel.ID)
+		updateErr := agents.UpdateAgentModel(agent.Path, agent.Name, selectedModel.ID)
 		if updateErr != nil {
 			log.Printf("Failed to update agent %s: %v", agent.Name, updateErr)
 		} else {
@@ -132,7 +176,7 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption)
 				for _, agent := range agentsToUpdate {
 					if agent.Name == agentName {
 						previousModel := previousModels[agentName]
-						restoreErr := agents.UpdateAgentModel(agent.Path, previousModel)
+						restoreErr := agents.UpdateAgentModel(agent.Path, agent.Name, previousModel)
 						if restoreErr != nil {
 							log.Printf("Failed to undo agent %s: %v", agentName, restoreErr)
 						} else {
@@ -145,10 +189,75 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption)
 		}
 	}
 
-	continueChoice, err := cli.PromptContinueOrExit()
+	return promptContinue()
+}
+
+func handleModeChange(selectedAgent models.Agent) (bool, error) {
+	selectedMode, err := cli.PromptModeSelection(selectedAgent.Mode)
 	if err != nil {
 		return false, err
 	}
 
+	if selectedMode == cli.BackChoice {
+		return true, nil
+	}
+
+	previousMode := selectedAgent.Mode
+	shouldAddField := false
+
+	if previousMode == "" {
+		shouldAddField, err = cli.PromptAddModeField()
+		if err != nil {
+			return false, err
+		}
+		if !shouldAddField {
+			fmt.Println("Keeping mode unset (defaults to 'all')")
+			return promptContinue()
+		}
+	}
+
+	fmt.Printf("\nUpdating agent '%s' mode to '%s'...\n", selectedAgent.Name, selectedMode)
+
+	updateErr := agents.UpdateAgentMode(selectedAgent.Path, selectedAgent.Name, selectedMode)
+	if updateErr != nil {
+		log.Printf("Failed to update agent %s: %v", selectedAgent.Name, updateErr)
+		return promptContinue()
+	}
+
+	fmt.Printf("✓ Updated %s mode to '%s'\n", selectedAgent.Name, selectedMode)
+
+	undoMessage := "Updated agent mode. Undo changes?"
+	wantUndo, undoErr := cli.PromptUndo(undoMessage)
+	if undoErr != nil {
+		return false, undoErr
+	}
+
+	if wantUndo {
+		fmt.Println("\nUndoing changes...")
+		if previousMode == "" {
+			restoreErr := agents.UpdateAgentMode(selectedAgent.Path, selectedAgent.Name, "")
+			if restoreErr != nil {
+				log.Printf("Failed to undo agent %s: %v", selectedAgent.Name, restoreErr)
+			} else {
+				fmt.Printf("✓ Restored %s mode to unset (default: all)\n", selectedAgent.Name)
+			}
+		} else {
+			restoreErr := agents.UpdateAgentMode(selectedAgent.Path, selectedAgent.Name, previousMode)
+			if restoreErr != nil {
+				log.Printf("Failed to undo agent %s: %v", selectedAgent.Name, restoreErr)
+			} else {
+				fmt.Printf("✓ Restored %s mode to '%s'\n", selectedAgent.Name, previousMode)
+			}
+		}
+	}
+
+	return promptContinue()
+}
+
+func promptContinue() (bool, error) {
+	continueChoice, err := cli.PromptContinueOrExit()
+	if err != nil {
+		return false, err
+	}
 	return continueChoice, nil
 }

@@ -33,13 +33,25 @@ func isValidModelID(modelID string) bool {
 	return true
 }
 
-func LoadOpencodeConfig() (*models.OpencodeConfig, error) {
+func LoadGlobalConfig() (*models.OpencodeConfig, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
 		return nil, err
 	}
 
 	configPath := filepath.Join(home, ".config", "opencode", "opencode.json")
+	return loadConfigFile(configPath)
+}
+
+func LoadProjectConfig() (*models.OpencodeConfig, error) {
+	configPath := filepath.Join(".", "opencode.json")
+	if _, err := os.Stat(configPath); os.IsNotExist(err) {
+		return nil, nil
+	}
+	return loadConfigFile(configPath)
+}
+
+func loadConfigFile(configPath string) (*models.OpencodeConfig, error) {
 	data, err := os.ReadFile(configPath)
 	if err != nil {
 		return nil, err
@@ -53,8 +65,34 @@ func LoadOpencodeConfig() (*models.OpencodeConfig, error) {
 	return &cfg, nil
 }
 
+func GetAgentsFromConfig(cfg *models.OpencodeConfig, location, format string) []models.Agent {
+	if cfg == nil || cfg.Agent == nil {
+		return nil
+	}
+
+	var agentList []models.Agent
+	for name, agentCfg := range cfg.Agent {
+		agentList = append(agentList, models.Agent{
+			Name:         name,
+			Path:         fmt.Sprintf("json:%s", location),
+			CurrentModel: agentCfg.Model,
+			Description:  agentCfg.Description,
+			Mode:         agentCfg.Mode,
+			Source: models.AgentSource{
+				Location: location,
+				Format:   format,
+			},
+		})
+	}
+	return agentList
+}
+
 func GetAvailableModels(cfg *models.OpencodeConfig) []models.ModelOption {
 	var options []models.ModelOption
+
+	if cfg == nil || cfg.Provider == nil {
+		return options
+	}
 
 	for providerID, provider := range cfg.Provider {
 		for modelID, model := range provider.Models {
@@ -105,4 +143,47 @@ func GetModelsFromCLI() ([]models.ModelOption, error) {
 	}
 
 	return options, nil
+}
+
+func GetGlobalConfigPath() (string, error) {
+	home, err := os.UserHomeDir()
+	if err != nil {
+		return "", err
+	}
+	return filepath.Join(home, ".config", "opencode", "opencode.json"), nil
+}
+
+func GetProjectConfigPath() string {
+	return filepath.Join(".", "opencode.json")
+}
+
+func UpdateAgentInJSON(configPath, agentName, field, value string) error {
+	data, err := os.ReadFile(configPath)
+	if err != nil {
+		return err
+	}
+
+	var cfg map[string]interface{}
+	if err := json.Unmarshal(data, &cfg); err != nil {
+		return err
+	}
+
+	agents, ok := cfg["agent"].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("no agent configurations found in %s", configPath)
+	}
+
+	agent, ok := agents[agentName].(map[string]interface{})
+	if !ok {
+		return fmt.Errorf("agent %s not found in %s", agentName, configPath)
+	}
+
+	agent[field] = value
+
+	newData, err := json.MarshalIndent(cfg, "", "  ")
+	if err != nil {
+		return err
+	}
+
+	return os.WriteFile(configPath, newData, 0600)
 }
