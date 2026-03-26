@@ -151,7 +151,8 @@ Agents can also be defined in `opencode.json`:
 
 ### TUI Interaction (Huh? Library)
 The tool uses `github.com/charmbracelet/huh` for interactive prompts:
-- `PromptAgentSelection()` - Select from agent list with source indicators
+- `PromptAgentSelection()` - Select from agent list with sort option and source indicators
+- `PromptSortSelection()` - Select sorting method (Agent A-Z/Z-A, Model A-Z/Z-A)
 - `PromptActionSelection()` - Choose action (Change Model / Change Mode / Back)
 - `PromptModelSelection()` - Select from model list with custom input option
 - `PromptModeSelection()` - Select mode (primary/subagent/all)
@@ -159,6 +160,15 @@ The tool uses `github.com/charmbracelet/huh` for interactive prompts:
 - `PromptAddModeField()` - Ask whether to add mode field
 - `PromptConfirm()` - Yes/No confirmation
 - `PromptUndo()` - Undo changes confirmation
+
+### Sorting Feature
+The main menu includes a "Sort by..." option that allows sorting the agent list:
+- **Agent name (A-Z)** - Sort alphabetically by agent name (default)
+- **Agent name (Z-A)** - Sort reverse-alphabetically by agent name
+- **Model name (A-Z)** - Sort alphabetically by model ID
+- **Model name (Z-A)** - Sort reverse-alphabetically by model ID
+
+The sort preference persists during the session. Sorting also applies to the model selection menu.
 
 ### External CLI Dependency
 - Tool calls `opencode models` to fetch available models

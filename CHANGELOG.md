@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Sorting options**: Sort agent and model lists alphabetically (A-Z or Z-A) by agent name or model name
+- Sort preference persists during the session
+- Default sort is Agent A-Z
+
 ## [0.4.0] - 2026-03-22
 
 ### Added

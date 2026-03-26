@@ -7,6 +7,15 @@ const (
 	FormatJSON     = "json"
 )
 
+const (
+	SortAgentAsc  = "agent-asc"
+	SortAgentDesc = "agent-desc"
+	SortModelAsc  = "model-asc"
+	SortModelDesc = "model-desc"
+)
+
+var DefaultSort = SortAgentAsc
+
 type OpencodeConfig struct {
 	Provider map[string]Provider    `json:"provider"`
 	Agent    map[string]AgentConfig `json:"agent"`

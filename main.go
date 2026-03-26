@@ -35,8 +35,10 @@ func main() {
 		log.Fatalf("No models found available")
 	}
 
+	currentSort := models.DefaultSort
+
 	for {
-		shouldContinue, loopErr := runAgentUpdate(agentList, modelOptions)
+		shouldContinue, loopErr := runAgentUpdate(agentList, modelOptions, &currentSort)
 		if loopErr != nil {
 			log.Fatalf("Error: %v", loopErr)
 		}
@@ -55,17 +57,34 @@ func main() {
 	fmt.Println("\nGoodbye!")
 }
 
-func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption) (bool, error) {
-	agentIndex, err := cli.PromptAgentSelection(agentList)
+func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption, currentSort *string) (bool, error) {
+	sortedAgents := cli.SortAgents(agentList, *currentSort)
+
+	selectedName, err := cli.PromptAgentSelection(sortedAgents, *currentSort)
 	if err != nil {
 		return false, err
 	}
 
-	if agentIndex == -2 {
+	if selectedName == cli.ExitChoice {
 		return false, nil
 	}
 
-	selectedAgent := agentList[agentIndex]
+	if selectedName == cli.SortChoice {
+		newSort, sortErr := cli.PromptSortSelection(*currentSort)
+		if sortErr != nil {
+			return false, sortErr
+		}
+		*currentSort = newSort
+		return true, nil
+	}
+
+	var selectedAgent models.Agent
+	for _, agent := range sortedAgents {
+		if agent.Name == selectedName {
+			selectedAgent = agent
+			break
+		}
+	}
 
 	for {
 		action, err := cli.PromptActionSelection(selectedAgent.CurrentModel, selectedAgent.Mode)
@@ -78,7 +97,7 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption)
 		}
 
 		if action == cli.ActionModel {
-			continueToMenu, err := handleModelChange(selectedAgent, agentList, modelOptions)
+			continueToMenu, err := handleModelChange(selectedAgent, agentList, modelOptions, *currentSort)
 			if err != nil {
 				return false, err
 			}
@@ -95,8 +114,9 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption)
 	}
 }
 
-func handleModelChange(selectedAgent models.Agent, agentList []models.Agent, modelOptions []models.ModelOption) (bool, error) {
-	selectedModelID, err := cli.PromptModelSelection(modelOptions)
+func handleModelChange(selectedAgent models.Agent, agentList []models.Agent, modelOptions []models.ModelOption, currentSort string) (bool, error) {
+	sortedModels := cli.SortModels(modelOptions, currentSort)
+	selectedModelID, err := cli.PromptModelSelection(sortedModels)
 	if err != nil {
 		return false, err
 	}
