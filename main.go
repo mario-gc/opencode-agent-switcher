@@ -36,9 +36,10 @@ func main() {
 	}
 
 	currentSort := models.DefaultSort
+	caseSensitive := true
 
 	for {
-		shouldContinue, loopErr := runAgentUpdate(agentList, modelOptions, &currentSort)
+		shouldContinue, loopErr := runAgentUpdate(agentList, modelOptions, &currentSort, &caseSensitive)
 		if loopErr != nil {
 			log.Fatalf("Error: %v", loopErr)
 		}
@@ -57,10 +58,10 @@ func main() {
 	fmt.Println("\nGoodbye!")
 }
 
-func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption, currentSort *string) (bool, error) {
-	sortedAgents := cli.SortAgents(agentList, *currentSort)
+func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption, currentSort *string, caseSensitive *bool) (bool, error) {
+	sortedAgents := cli.SortAgents(agentList, *currentSort, *caseSensitive)
 
-	selectedName, err := cli.PromptAgentSelection(sortedAgents, *currentSort)
+	selectedName, err := cli.PromptAgentSelection(sortedAgents, *currentSort, *caseSensitive)
 	if err != nil {
 		return false, err
 	}
@@ -70,11 +71,12 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption,
 	}
 
 	if selectedName == cli.SortChoice {
-		newSort, sortErr := cli.PromptSortSelection(*currentSort)
+		newSort, newCaseSensitive, sortErr := cli.PromptSortSelection(*currentSort, *caseSensitive)
 		if sortErr != nil {
 			return false, sortErr
 		}
 		*currentSort = newSort
+		*caseSensitive = newCaseSensitive
 		return true, nil
 	}
 
@@ -97,7 +99,7 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption,
 		}
 
 		if action == cli.ActionModel {
-			continueToMenu, err := handleModelChange(selectedAgent, agentList, modelOptions, *currentSort)
+			continueToMenu, err := handleModelChange(selectedAgent, agentList, modelOptions, *currentSort, *caseSensitive)
 			if err != nil {
 				return false, err
 			}
@@ -114,8 +116,8 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption,
 	}
 }
 
-func handleModelChange(selectedAgent models.Agent, agentList []models.Agent, modelOptions []models.ModelOption, currentSort string) (bool, error) {
-	sortedModels := cli.SortModels(modelOptions, currentSort)
+func handleModelChange(selectedAgent models.Agent, agentList []models.Agent, modelOptions []models.ModelOption, currentSort string, caseSensitive bool) (bool, error) {
+	sortedModels := cli.SortModels(modelOptions, currentSort, caseSensitive)
 	selectedModelID, err := cli.PromptModelSelection(sortedModels)
 	if err != nil {
 		return false, err

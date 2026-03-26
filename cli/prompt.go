@@ -3,6 +3,7 @@ package cli
 import (
 	"fmt"
 	"sort"
+	"strings"
 
 	"github.com/charmbracelet/huh"
 
@@ -10,19 +11,20 @@ import (
 )
 
 const (
-	ExitChoice        = "__EXIT__"
-	ContinueChoice    = "__CONTINUE__"
-	BackChoice        = "__BACK__"
-	SortChoice        = "__SORT__"
-	CustomModelChoice = "__CUSTOM__"
-	ActionModel       = "model"
-	ActionMode        = "mode"
+	ExitChoice          = "__EXIT__"
+	ContinueChoice      = "__CONTINUE__"
+	BackChoice          = "__BACK__"
+	SortChoice          = "__SORT__"
+	CustomModelChoice   = "__CUSTOM__"
+	ActionModel         = "model"
+	ActionMode          = "mode"
+	CaseSensitiveToggle = "__CASE_TOGGLE__"
 )
 
-func PromptAgentSelection(agents []models.Agent, currentSort string) (string, error) {
+func PromptAgentSelection(agents []models.Agent, currentSort string, caseSensitive bool) (string, error) {
 	var selectedName string
 
-	sortDisplay := getSortDisplay(currentSort)
+	sortDisplay := getSortDisplay(currentSort, caseSensitive)
 	sortOption := fmt.Sprintf("Sort by... (%s)", sortDisplay)
 
 	options := make([]huh.Option[string], 0, len(agents)+2)
@@ -257,23 +259,34 @@ func PromptUndo(message string) (bool, error) {
 	return choice == "undo", nil
 }
 
-func getSortDisplay(sortBy string) string {
+func getSortDisplay(sortBy string, caseSensitive bool) string {
+	var sortType string
 	switch sortBy {
 	case models.SortAgentAsc:
-		return "Agent A-Z"
+		sortType = "Agent A-Z"
 	case models.SortAgentDesc:
-		return "Agent Z-A"
+		sortType = "Agent Z-A"
 	case models.SortModelAsc:
-		return "Model A-Z"
+		sortType = "Model A-Z"
 	case models.SortModelDesc:
-		return "Model Z-A"
+		sortType = "Model Z-A"
 	default:
-		return "Agent A-Z"
+		sortType = "Agent A-Z"
 	}
+
+	if !caseSensitive {
+		sortType += " (case-insensitive)"
+	}
+	return sortType
 }
 
-func PromptSortSelection(currentSort string) (string, error) {
+func PromptSortSelection(currentSort string, caseSensitive bool) (string, bool, error) {
 	var selected string
+
+	caseDisplay := "On"
+	if !caseSensitive {
+		caseDisplay = "Off"
+	}
 
 	form := huh.NewForm(
 		huh.NewGroup(
@@ -284,6 +297,7 @@ func PromptSortSelection(currentSort string) (string, error) {
 					huh.NewOption("Agent name (Z-A)", models.SortAgentDesc),
 					huh.NewOption("Model name (A-Z)", models.SortModelAsc),
 					huh.NewOption("Model name (Z-A)", models.SortModelDesc),
+					huh.NewOption(fmt.Sprintf("Case-sensitive: %s", caseDisplay), CaseSensitiveToggle),
 					huh.NewOption("Back", BackChoice),
 				).
 				Value(&selected),
@@ -291,62 +305,80 @@ func PromptSortSelection(currentSort string) (string, error) {
 	)
 
 	if err := form.Run(); err != nil {
-		return currentSort, err
+		return currentSort, caseSensitive, err
 	}
 
 	if selected == BackChoice {
-		return currentSort, nil
+		return currentSort, caseSensitive, nil
 	}
 
-	return selected, nil
+	if selected == CaseSensitiveToggle {
+		return currentSort, !caseSensitive, nil
+	}
+
+	return selected, caseSensitive, nil
 }
 
-func SortAgents(agents []models.Agent, sortBy string) []models.Agent {
+func SortAgents(agents []models.Agent, sortBy string, caseSensitive bool) []models.Agent {
 	result := make([]models.Agent, len(agents))
 	copy(result, agents)
+
+	compareStrings := func(a, b string) bool {
+		if caseSensitive {
+			return a < b
+		}
+		return strings.ToLower(a) < strings.ToLower(b)
+	}
 
 	switch sortBy {
 	case models.SortAgentAsc:
 		sort.Slice(result, func(i, j int) bool {
-			return result[i].Name < result[j].Name
+			return compareStrings(result[i].Name, result[j].Name)
 		})
 	case models.SortAgentDesc:
 		sort.Slice(result, func(i, j int) bool {
-			return result[i].Name > result[j].Name
+			return compareStrings(result[j].Name, result[i].Name)
 		})
 	case models.SortModelAsc:
 		sort.Slice(result, func(i, j int) bool {
-			return result[i].CurrentModel < result[j].CurrentModel
+			return compareStrings(result[i].CurrentModel, result[j].CurrentModel)
 		})
 	case models.SortModelDesc:
 		sort.Slice(result, func(i, j int) bool {
-			return result[i].CurrentModel > result[j].CurrentModel
+			return compareStrings(result[j].CurrentModel, result[i].CurrentModel)
 		})
 	default:
 		sort.Slice(result, func(i, j int) bool {
-			return result[i].Name < result[j].Name
+			return compareStrings(result[i].Name, result[j].Name)
 		})
 	}
 
 	return result
 }
 
-func SortModels(modelOptions []models.ModelOption, sortBy string) []models.ModelOption {
+func SortModels(modelOptions []models.ModelOption, sortBy string, caseSensitive bool) []models.ModelOption {
 	result := make([]models.ModelOption, len(modelOptions))
 	copy(result, modelOptions)
+
+	compareStrings := func(a, b string) bool {
+		if caseSensitive {
+			return a < b
+		}
+		return strings.ToLower(a) < strings.ToLower(b)
+	}
 
 	switch sortBy {
 	case models.SortModelAsc:
 		sort.Slice(result, func(i, j int) bool {
-			return result[i].ID < result[j].ID
+			return compareStrings(result[i].ID, result[j].ID)
 		})
 	case models.SortModelDesc:
 		sort.Slice(result, func(i, j int) bool {
-			return result[i].ID > result[j].ID
+			return compareStrings(result[j].ID, result[i].ID)
 		})
 	default:
 		sort.Slice(result, func(i, j int) bool {
-			return result[i].ID < result[j].ID
+			return compareStrings(result[i].ID, result[j].ID)
 		})
 	}
 

@@ -9,8 +9,9 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 - **Sorting options**: Sort agent and model lists alphabetically (A-Z or Z-A) by agent name or model name
+- **Case-sensitivity toggle**: Toggle case-sensitive sorting (On by default) within the sort menu
 - Sort preference persists during the session
-- Default sort is Agent A-Z
+- Default sort is Agent A-Z with case-sensitive enabled
 
 ## [0.4.0] - 2026-03-22
 

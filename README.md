@@ -15,7 +15,7 @@ A CLI tool for managing and switching AI models and modes for Opencode agents.
   - Project JSON: `./opencode.json`
 - **Model Switching:** Change the AI model assigned to any agent
 - **Mode Switching:** Change agent mode (primary/subagent/all)
-- **Sorting Options:** Sort agents and models alphabetically (A-Z/Z-A)
+- **Sorting Options:** Sort agents and models alphabetically (A-Z/Z-A) with case-sensitivity toggle
 - **Custom Model Input:** Enter custom model IDs directly (format: `provider/model`)
 - **Interactive TUI:** Beautiful terminal user interface using [Huh?](https://github.com/charmbracelet/huh)
 - **Batch Updates:** Detects if multiple agents use the same model and offers to update them all

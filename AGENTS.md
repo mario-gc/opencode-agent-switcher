@@ -167,6 +167,7 @@ The main menu includes a "Sort by..." option that allows sorting the agent list:
 - **Agent name (Z-A)** - Sort reverse-alphabetically by agent name
 - **Model name (A-Z)** - Sort alphabetically by model ID
 - **Model name (Z-A)** - Sort reverse-alphabetically by model ID
+- **Case-sensitive** - Toggle case sensitivity (On by default)
 
 The sort preference persists during the session. Sorting also applies to the model selection menu.
 
