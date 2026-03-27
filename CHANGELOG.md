@@ -7,6 +7,12 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.1] - 2026-03-27
+
+### Changed
+- Updated GitHub Actions to use Node.js 24 via `FORCE_JAVASCRIPT_ACTIONS_TO_NODE24` environment variable
+- Pinned GoReleaser version to v2.8.1 and golangci-lint to v1.64.8 for reproducible builds
+
 ## [0.6.0] - 2026-03-27
 
 ### Added
@@ -99,7 +105,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - YAML frontmatter parsing for agent configuration files
 - MIT License
 
-[Unreleased]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.6.0...HEAD
+[Unreleased]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.6.1...HEAD
+[0.6.1]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.3.0...v0.4.0
