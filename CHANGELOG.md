@@ -7,6 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2026-03-27
+
+### Added
+- **CD Pipeline**: Automatic binary releases using GoReleaser on tag push
+- **Version flag**: `-v` or `--version` to display version, commit, and build date
+- Pre-built binaries for Linux (amd64, arm64) available on GitHub Releases
+
+### Changed
+- Updated Makefile with version injection via ldflags
+
 ## [0.5.0] - 2026-03-26
 
 ### Added
@@ -89,7 +99,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - YAML frontmatter parsing for agent configuration files
 - MIT License
 
-[Unreleased]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.5.0...HEAD
+[Unreleased]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.6.0...HEAD
+[0.6.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.4.0...v0.5.0
 [0.4.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.3.0...v0.4.0
 [0.3.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.2.0...v0.3.0

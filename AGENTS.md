@@ -180,6 +180,32 @@ The sort preference persists during the session. Sorting also applies to the mod
 - Use `filepath.Join` for path construction
 - Use `os.ReadFile`/`os.WriteFile` for file I/O
 
+### CD Pipeline (GoReleaser)
+The project uses GoReleaser for automated binary releases:
+
+**Trigger:** Push a version tag (e.g., `v0.6.0`)
+
+**Process:**
+1. Tag push triggers `.github/workflows/release.yml`
+2. Tests run automatically
+3. GoReleaser builds binaries for Linux (amd64, arm64)
+4. GitHub Release is created with binaries and checksums
+
+**Configuration:** `.goreleaser.yml`
+
+**Release Flow:**
+```bash
+# After merging to main and updating CHANGELOG.md
+git tag -a v0.6.0 -m "Release v0.6.0"
+git push origin v0.6.0
+# CD pipeline automatically creates the release
+```
+
+**Artifacts:**
+- `opencode-agent-switcher_X.X.X_linux_amd64.tar.gz`
+- `opencode-agent-switcher_X.X.X_linux_arm64.tar.gz`
+- `checksums.txt`
+
 ## 5. Agent Behavior Rules
 
 - **No Hallucinations:** Do not invent flags or commands not in the codebase
