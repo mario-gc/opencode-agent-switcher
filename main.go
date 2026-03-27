@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"log"
+	"os"
 
 	"opencode-agent-switcher/agents"
 	"opencode-agent-switcher/cli"
@@ -10,7 +11,18 @@ import (
 	"opencode-agent-switcher/models"
 )
 
+var (
+	version = "dev"
+	commit  = "unknown"
+	date    = "unknown"
+)
+
 func main() {
+	if len(os.Args) > 1 && (os.Args[1] == "--version" || os.Args[1] == "-v") {
+		fmt.Printf("opencode-agent-switcher %s (commit: %s, built: %s)\n", version, commit, date)
+		os.Exit(0)
+	}
+
 	cfg, err := config.LoadGlobalConfig()
 	if err != nil {
 		fmt.Printf("Warning: Failed to load global opencode config: %v\n", err)

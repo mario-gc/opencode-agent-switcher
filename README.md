@@ -29,6 +29,21 @@ A CLI tool for managing and switching AI models and modes for Opencode agents.
 
 ## Installation
 
+### Download Binary
+
+Download the latest release for your platform from the [Releases page](https://github.com/mario-gc/opencode-agent-switcher/releases):
+
+```bash
+# Linux (amd64)
+curl -sL https://github.com/mario-gc/opencode-agent-switcher/releases/latest/download/opencode-agent-switcher_0.6.0_linux_amd64.tar.gz | tar xz
+
+# Linux (arm64)
+curl -sL https://github.com/mario-gc/opencode-agent-switcher/releases/latest/download/opencode-agent-switcher_0.6.0_linux_arm64.tar.gz | tar xz
+
+# Make executable
+chmod +x opencode-agent-switcher
+```
+
 ### From Source
 
 ```bash
@@ -56,6 +71,17 @@ Run the tool directly from the terminal:
 
 ```bash
 opencode-agent-switcher
+```
+
+### Command Line Options
+
+| Option | Description |
+|--------|-------------|
+| `-v`, `--version` | Show version information |
+
+```bash
+opencode-agent-switcher --version
+# Output: opencode-agent-switcher 0.6.0 (commit: abc1234, built: 2026-03-27)
 ```
 
 ### Workflow
