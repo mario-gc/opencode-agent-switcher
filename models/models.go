@@ -58,3 +58,15 @@ type Agent struct {
 	Mode         string
 	Source       AgentSource
 }
+
+type AgentAssignment struct {
+	Model  string      `json:"model"`
+	Mode   string      `json:"mode"`
+	Source AgentSource `json:"source"`
+}
+
+type Template struct {
+	Name      string                     `json:"name"`
+	CreatedAt string                     `json:"created_at"`
+	Agents    map[string]AgentAssignment `json:"agents"`
+}

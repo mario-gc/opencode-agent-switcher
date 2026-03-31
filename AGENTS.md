@@ -20,6 +20,7 @@ This document provides instructions and guidelines for AI agents operating withi
 | `config/` | Configuration loading and parsing (`config/config.go`) |
 | `agents/` | Agent discovery and modification logic (`agents/agents.go`) |
 | `models/` | Shared data structures (`models/models.go`) |
+| `templates/` | Template save/load/delete operations (`templates/templates.go`) |
 
 ## 2. Build and Test Commands
 
@@ -170,6 +171,52 @@ The main menu includes a "Sort by..." option that allows sorting the agent list:
 - **Case-sensitive** - Toggle case sensitivity (On by default)
 
 The sort preference persists during the session. Sorting also applies to the model selection menu.
+
+### Templates Feature
+Templates allow saving and restoring agent configurations (model + mode assignments).
+
+**Storage Location:** `~/.config/opencode-agent-switcher/templates/`
+
+**Template File Format (JSON):**
+```json
+{
+  "name": "production-setup",
+  "created_at": "2026-03-31T10:00:00Z",
+  "agents": {
+    "architect": {
+      "model": "anthropic/claude-3-opus",
+      "mode": "primary",
+      "source": {
+        "location": "global",
+        "format": "markdown"
+      }
+    }
+  }
+}
+```
+
+**Template Matching:**
+- Templates use strict matching: agent name + source (location/format) must match
+- Agents in template without matching current agents are listed as "unmatched"
+- User is warned about unmatched agents before applying template
+
+**Template Operations:**
+- `SaveTemplate(name, agents)` - Save current configuration as template
+- `LoadTemplates()` - List all available templates
+- `LoadTemplateByName(name)` - Load specific template
+- `DeleteTemplate(name)` - Remove template file
+- `MatchAgents(template, agents)` - Find agents matching template with source info
+
+**Template Prompts:**
+- `PromptTemplateMenu()` - Save / Show / Back
+- `PromptTemplateName()` - Input name for new template
+- `PromptTemplateSelection(templates)` - Select from template list
+- `PromptTemplateAction(name)` - Inspect / Load / Delete / Back
+- `PromptTemplateOverwrite(name)` - Confirm overwrite if exists
+- `PromptTemplateLoadConfirm()` - Confirm load with summary
+- `PromptTemplateDeleteConfirm(name)` - Confirm deletion
+- `PromptTemplateContinueOrExit()` - Continue / Exit after template operation
+- `FormatTemplateInspect(template)` - Format template details for display
 
 ### External CLI Dependency
 - Tool calls `opencode models` to fetch available models
