@@ -9,6 +9,7 @@ import (
 	"opencode-agent-switcher/cli"
 	"opencode-agent-switcher/config"
 	"opencode-agent-switcher/models"
+	"opencode-agent-switcher/templates"
 )
 
 var (
@@ -90,6 +91,14 @@ func runAgentUpdate(agentList []models.Agent, modelOptions []models.ModelOption,
 		*currentSort = newSort
 		*caseSensitive = newCaseSensitive
 		return true, nil
+	}
+
+	if selectedName == cli.TemplatesChoice {
+		continueToMenu, templateErr := handleTemplates(agentList)
+		if templateErr != nil {
+			return false, templateErr
+		}
+		return continueToMenu, nil
 	}
 
 	var selectedAgent models.Agent
@@ -294,4 +303,262 @@ func promptContinue() (bool, error) {
 		return false, err
 	}
 	return continueChoice, nil
+}
+
+func handleTemplates(agentList []models.Agent) (bool, error) {
+	for {
+		choice, err := cli.PromptTemplateMenu()
+		if err != nil {
+			return false, err
+		}
+
+		if choice == cli.BackChoice {
+			return true, nil
+		}
+
+		if choice == cli.TemplateSave {
+			continueToMenu, saveErr := handleTemplateSave(agentList)
+			if saveErr != nil {
+				return false, saveErr
+			}
+			if !continueToMenu {
+				return false, nil
+			}
+			continue
+		}
+
+		if choice == cli.TemplateShow {
+			continueToMenu, showErr := handleTemplateShow(agentList)
+			if showErr != nil {
+				return false, showErr
+			}
+			if !continueToMenu {
+				return false, nil
+			}
+			continue
+		}
+	}
+}
+
+func handleTemplateSave(agentList []models.Agent) (bool, error) {
+	name, err := cli.PromptTemplateName()
+	if err != nil {
+		return false, err
+	}
+
+	if err := templates.ValidateTemplateName(name); err != nil {
+		fmt.Printf("Invalid template name: %v\n", err)
+		return true, nil
+	}
+
+	exists, err := templates.TemplateExists(name)
+	if err != nil {
+		return false, err
+	}
+
+	if exists {
+		overwrite, confirmErr := cli.PromptTemplateOverwrite(name)
+		if confirmErr != nil {
+			return false, confirmErr
+		}
+		if !overwrite {
+			return true, nil
+		}
+	}
+
+	if err := templates.SaveTemplate(name, agentList); err != nil {
+		fmt.Printf("Failed to save template: %v\n", err)
+		return true, nil
+	}
+
+	fmt.Printf("\n✓ Template '%s' saved with %d agents\n", name, len(agentList))
+	return promptContinue()
+}
+
+func handleTemplateShow(agentList []models.Agent) (bool, error) {
+	templateList, err := templates.LoadTemplates()
+	if err != nil {
+		return false, err
+	}
+
+	if len(templateList) == 0 {
+		fmt.Println("\nThere are no templates saved")
+		return promptContinue()
+	}
+
+	for {
+		selectedName, err := cli.PromptTemplateSelection(templateList)
+		if err != nil {
+			return false, err
+		}
+
+		if selectedName == cli.BackChoice || selectedName == "" {
+			return true, nil
+		}
+
+		action, err := cli.PromptTemplateAction(selectedName)
+		if err != nil {
+			return false, err
+		}
+
+		if action == cli.BackChoice {
+			continue
+		}
+
+		if action == cli.TemplateLoad {
+			continueToMenu, loadErr := handleTemplateLoad(selectedName, agentList)
+			if loadErr != nil {
+				return false, loadErr
+			}
+			return continueToMenu, nil
+		}
+
+		if action == cli.TemplateDelete {
+			continueToMenu, deleteErr := handleTemplateDelete(selectedName)
+			if deleteErr != nil {
+				return false, deleteErr
+			}
+			if !continueToMenu {
+				return false, nil
+			}
+			templateList, err = templates.LoadTemplates()
+			if err != nil {
+				return false, err
+			}
+			continue
+		}
+	}
+}
+
+func handleTemplateLoad(templateName string, agentList []models.Agent) (bool, error) {
+	template, err := templates.LoadTemplateByName(templateName)
+	if err != nil {
+		return false, err
+	}
+
+	matched, unmatched := templates.MatchAgents(template, agentList)
+
+	fmt.Printf("\nTemplate '%s' summary:\n", templateName)
+	fmt.Printf("  %d agents will be updated\n", len(matched))
+	if len(unmatched) > 0 {
+		fmt.Printf("  %d agents in template not matched (different source):\n", len(unmatched))
+		for _, name := range unmatched {
+			fmt.Printf("    - %s\n", name)
+		}
+	}
+
+	if len(matched) == 0 {
+		fmt.Println("\nNo agents match this template. Cannot apply.")
+		return promptContinue()
+	}
+
+	confirmed, confirmErr := cli.PromptTemplateLoadConfirm(len(matched), len(unmatched))
+	if confirmErr != nil {
+		return false, confirmErr
+	}
+
+	if !confirmed {
+		return true, nil
+	}
+
+	fmt.Printf("\nApplying template '%s'...\n", templateName)
+
+	previousStates := make(map[string]models.AgentAssignment)
+	for _, agent := range matched {
+		for _, current := range agentList {
+			if current.Name == agent.Name &&
+				current.Source.Location == agent.Source.Location &&
+				current.Source.Format == agent.Source.Format {
+				previousStates[agent.Name] = models.AgentAssignment{
+					Model:  current.CurrentModel,
+					Mode:   current.Mode,
+					Source: current.Source,
+				}
+				break
+			}
+		}
+	}
+
+	updatedAgents := []string{}
+	for _, agent := range matched {
+		if agent.CurrentModel != "" {
+			updateErr := agents.UpdateAgentModel(agent.Path, agent.Name, agent.CurrentModel)
+			if updateErr != nil {
+				log.Printf("Failed to update model for %s: %v", agent.Name, updateErr)
+			} else {
+				fmt.Printf("✓ Updated %s model to '%s'\n", agent.Name, agent.CurrentModel)
+				updatedAgents = append(updatedAgents, agent.Name)
+			}
+		}
+
+		if agent.Mode != "" {
+			modeErr := agents.UpdateAgentMode(agent.Path, agent.Name, agent.Mode)
+			if modeErr != nil {
+				log.Printf("Failed to update mode for %s: %v", agent.Name, modeErr)
+			} else {
+				fmt.Printf("✓ Updated %s mode to '%s'\n", agent.Name, agent.Mode)
+			}
+		}
+	}
+
+	if len(updatedAgents) > 0 {
+		undoMessage := fmt.Sprintf("Template applied to %d agents. Undo changes?", len(updatedAgents))
+		wantUndo, undoErr := cli.PromptUndo(undoMessage)
+		if undoErr != nil {
+			return false, undoErr
+		}
+
+		if wantUndo {
+			fmt.Println("\nUndoing changes...")
+			for _, agentName := range updatedAgents {
+				previous := previousStates[agentName]
+				var agent models.Agent
+				for _, m := range matched {
+					if m.Name == agentName {
+						agent = m
+						break
+					}
+				}
+
+				if previous.Model != "" {
+					restoreErr := agents.UpdateAgentModel(agent.Path, agentName, previous.Model)
+					if restoreErr != nil {
+						log.Printf("Failed to undo model for %s: %v", agentName, restoreErr)
+					} else {
+						fmt.Printf("✓ Restored %s model to '%s'\n", agentName, previous.Model)
+					}
+				}
+
+				if previous.Mode != "" {
+					modeErr := agents.UpdateAgentMode(agent.Path, agentName, previous.Mode)
+					if modeErr != nil {
+						log.Printf("Failed to undo mode for %s: %v", agentName, modeErr)
+					} else {
+						fmt.Printf("✓ Restored %s mode to '%s'\n", agentName, previous.Mode)
+					}
+				}
+			}
+		}
+	}
+
+	return promptContinue()
+}
+
+func handleTemplateDelete(templateName string) (bool, error) {
+	confirmed, err := cli.PromptTemplateDeleteConfirm(templateName)
+	if err != nil {
+		return false, err
+	}
+
+	if !confirmed {
+		return true, nil
+	}
+
+	if err := templates.DeleteTemplate(templateName); err != nil {
+		fmt.Printf("Failed to delete template: %v\n", err)
+		return true, nil
+	}
+
+	fmt.Printf("\n✓ Template '%s' deleted\n", templateName)
+	return promptContinue()
 }

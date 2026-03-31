@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- **Templates**: Save and restore agent configurations (model + mode) as named templates
+  - Templates stored globally in `~/.config/opencode-agent-switcher/templates/`
+  - Strict matching by agent name + source (global/project, markdown/JSON)
+  - Load, delete, and overwrite templates with confirmation
+  - Undo support after loading a template
+  - Warning for unmatched agents when loading template
+
 ## [0.6.1] - 2026-03-27
 
 ### Changed

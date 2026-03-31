@@ -15,6 +15,10 @@ A CLI tool for managing and switching AI models and modes for Opencode agents.
   - Project JSON: `./opencode.json`
 - **Model Switching:** Change the AI model assigned to any agent
 - **Mode Switching:** Change agent mode (primary/subagent/all)
+- **Templates:** Save and restore agent configurations (model + mode) as named templates
+  - Templates stored globally in `~/.config/opencode-agent-switcher/templates/`
+  - Strict matching by agent name + source (global/project, markdown/JSON)
+  - Load, delete, and overwrite templates with confirmation
 - **Sorting Options:** Sort agents and models alphabetically (A-Z/Z-A) with case-sensitivity toggle
 - **Custom Model Input:** Enter custom model IDs directly (format: `provider/model`)
 - **Interactive TUI:** Beautiful terminal user interface using [Huh?](https://github.com/charmbracelet/huh)
@@ -89,6 +93,7 @@ opencode-agent-switcher --version
 1. The tool loads your Opencode configuration and available agents from all sources
 2. An interactive menu appears with:
    - **Sort by...** - Change how agents are sorted (Agent A-Z/Z-A, Model A-Z/Z-A)
+   - **Templates** - Save, load, or delete agent configuration templates
    - All available agents with their current model, mode, and source
    - An "Exit" option to quit the application
 3. Select an agent to modify
@@ -99,6 +104,18 @@ opencode-agent-switcher --version
 5. If changing mode and the agent has no mode set, choose whether to add the field
 6. If other agents use the same model, you'll be asked to update them all
 7. After updating, you can undo changes or continue
+
+### Templates Workflow
+
+1. Select **Templates** from the main menu
+2. Choose:
+   - **Save current configuration as template** - Enter a name and save all agent configs
+   - **Show existing templates** - View, load, or delete saved templates
+3. When loading a template:
+   - Shows summary of agents that will be updated
+   - Warns about unmatched agents (different source type)
+   - Confirms before applying changes
+   - Offers undo after applying
 
 ### Source Indicators
 
@@ -126,6 +143,9 @@ When agents have the same name in different sources, project-level configuration
 ├── agents/              # Agent discovery and modification
 │   └── agents.go        # Agent file operations
 ├── models/              # Shared data structures
+│   └── models.go        # Agent, Template, ModelOption structs
+├── templates/           # Template management
+│   └── templates.go     # Template save/load/delete operations
 ├── Makefile             # Build automation
 ├── .golangci.yml        # Linting configuration
 └── go.mod               # Go module definition

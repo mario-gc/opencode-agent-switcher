@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"sort"
 	"strings"
+	"time"
 
 	"github.com/charmbracelet/huh"
 
@@ -19,6 +20,11 @@ const (
 	ActionModel         = "model"
 	ActionMode          = "mode"
 	CaseSensitiveToggle = "__CASE_TOGGLE__"
+	TemplatesChoice     = "__TEMPLATES__"
+	TemplateSave        = "save"
+	TemplateShow        = "show"
+	TemplateLoad        = "load"
+	TemplateDelete      = "delete"
 )
 
 func PromptAgentSelection(agents []models.Agent, currentSort string, caseSensitive bool) (string, error) {
@@ -27,8 +33,9 @@ func PromptAgentSelection(agents []models.Agent, currentSort string, caseSensiti
 	sortDisplay := getSortDisplay(currentSort, caseSensitive)
 	sortOption := fmt.Sprintf("Sort by... (%s)", sortDisplay)
 
-	options := make([]huh.Option[string], 0, len(agents)+2)
+	options := make([]huh.Option[string], 0, len(agents)+3)
 	options = append(options, huh.NewOption(sortOption, SortChoice))
+	options = append(options, huh.NewOption("Templates", TemplatesChoice))
 
 	for _, agent := range agents {
 		sourceTag := formatSourceTag(agent.Source)
@@ -383,4 +390,179 @@ func SortModels(modelOptions []models.ModelOption, sortBy string, caseSensitive 
 	}
 
 	return result
+}
+
+func PromptTemplateMenu() (string, error) {
+	var choice string
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Templates").
+				Options(
+					huh.NewOption("Save current configuration as template", TemplateSave),
+					huh.NewOption("Show existing templates", TemplateShow),
+					huh.NewOption("Return to main menu", BackChoice),
+				).
+				Value(&choice),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return "", err
+	}
+
+	return choice, nil
+}
+
+func PromptTemplateName() (string, error) {
+	var name string
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewInput().
+				Title("Enter template name").
+				Placeholder("my-template").
+				Value(&name),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return "", err
+	}
+
+	return name, nil
+}
+
+func PromptTemplateSelection(templates []models.Template) (string, error) {
+	if len(templates) == 0 {
+		return "", nil
+	}
+
+	var selected string
+	options := make([]huh.Option[string], len(templates)+1)
+
+	for i, template := range templates {
+		display := fmt.Sprintf("%s (created: %s, agents: %d)", template.Name, formatDate(template.CreatedAt), len(template.Agents))
+		options[i] = huh.NewOption(display, template.Name)
+	}
+	options[len(templates)] = huh.NewOption("Back", BackChoice)
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("Select a template").
+				Options(options...).
+				Value(&selected).
+				Height(15),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return "", err
+	}
+
+	return selected, nil
+}
+
+func formatDate(timestamp string) string {
+	if timestamp == "" {
+		return "unknown"
+	}
+	t, err := time.Parse(time.RFC3339, timestamp)
+	if err != nil {
+		return timestamp
+	}
+	return t.Format("2006-01-02")
+}
+
+func PromptTemplateAction(templateName string) (string, error) {
+	var action string
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title(fmt.Sprintf("Template: %s - What would you like to do?", templateName)).
+				Options(
+					huh.NewOption("Load this template", TemplateLoad),
+					huh.NewOption("Delete this template", TemplateDelete),
+					huh.NewOption("Back", BackChoice),
+				).
+				Value(&action),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return "", err
+	}
+
+	return action, nil
+}
+
+func PromptTemplateOverwrite(templateName string) (bool, error) {
+	var choice string
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title(fmt.Sprintf("Template '%s' already exists. Overwrite?", templateName)).
+				Options(
+					huh.NewOption("Yes, overwrite", "yes"),
+					huh.NewOption("No, use different name", "no"),
+				).
+				Value(&choice),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return false, err
+	}
+
+	return choice == "yes", nil
+}
+
+func PromptTemplateLoadConfirm(matchedCount, unmatchedCount int) (bool, error) {
+	var choice string
+
+	message := fmt.Sprintf("Load template? (%d agents will be updated, %d unmatched)", matchedCount, unmatchedCount)
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title(message).
+				Options(
+					huh.NewOption("Yes, load template", "yes"),
+					huh.NewOption("No, go back", "no"),
+				).
+				Value(&choice),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return false, err
+	}
+
+	return choice == "yes", nil
+}
+
+func PromptTemplateDeleteConfirm(templateName string) (bool, error) {
+	var choice string
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title(fmt.Sprintf("Delete template '%s'?", templateName)).
+				Options(
+					huh.NewOption("Yes, delete", "yes"),
+					huh.NewOption("No, keep it", "no"),
+				).
+				Value(&choice),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return false, err
+	}
+
+	return choice == "yes", nil
 }
