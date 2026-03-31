@@ -305,6 +305,14 @@ func promptContinue() (bool, error) {
 	return continueChoice, nil
 }
 
+func promptTemplateContinue() (bool, error) {
+	continueChoice, err := cli.PromptTemplateContinueOrExit()
+	if err != nil {
+		return false, err
+	}
+	return continueChoice, nil
+}
+
 func handleTemplates(agentList []models.Agent) (bool, error) {
 	for {
 		choice, err := cli.PromptTemplateMenu()
@@ -372,7 +380,7 @@ func handleTemplateSave(agentList []models.Agent) (bool, error) {
 	}
 
 	fmt.Printf("\n✓ Template '%s' saved with %d agents\n", name, len(agentList))
-	return promptContinue()
+	return promptTemplateContinue()
 }
 
 func handleTemplateShow(agentList []models.Agent) (bool, error) {
@@ -383,7 +391,7 @@ func handleTemplateShow(agentList []models.Agent) (bool, error) {
 
 	if len(templateList) == 0 {
 		fmt.Println("\nThere are no templates saved")
-		return promptContinue()
+		return promptTemplateContinue()
 	}
 
 	for {
@@ -402,6 +410,11 @@ func handleTemplateShow(agentList []models.Agent) (bool, error) {
 		}
 
 		if action == cli.BackChoice {
+			continue
+		}
+
+		if action == cli.TemplateInspect {
+			handleTemplateInspect(selectedName)
 			continue
 		}
 
@@ -449,7 +462,7 @@ func handleTemplateLoad(templateName string, agentList []models.Agent) (bool, er
 
 	if len(matched) == 0 {
 		fmt.Println("\nNo agents match this template. Cannot apply.")
-		return promptContinue()
+		return promptTemplateContinue()
 	}
 
 	confirmed, confirmErr := cli.PromptTemplateLoadConfirm(len(matched), len(unmatched))
@@ -541,7 +554,17 @@ func handleTemplateLoad(templateName string, agentList []models.Agent) (bool, er
 		}
 	}
 
-	return promptContinue()
+	return promptTemplateContinue()
+}
+
+func handleTemplateInspect(templateName string) {
+	template, err := templates.LoadTemplateByName(templateName)
+	if err != nil {
+		fmt.Printf("Failed to load template: %v\n", err)
+		return
+	}
+
+	fmt.Printf("\n%s\n", cli.FormatTemplateInspect(template))
 }
 
 func handleTemplateDelete(templateName string) (bool, error) {
@@ -560,5 +583,5 @@ func handleTemplateDelete(templateName string) (bool, error) {
 	}
 
 	fmt.Printf("\n✓ Template '%s' deleted\n", templateName)
-	return promptContinue()
+	return promptTemplateContinue()
 }

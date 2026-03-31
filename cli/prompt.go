@@ -25,6 +25,7 @@ const (
 	TemplateShow        = "show"
 	TemplateLoad        = "load"
 	TemplateDelete      = "delete"
+	TemplateInspect     = "inspect"
 )
 
 func PromptAgentSelection(agents []models.Agent, currentSort string, caseSensitive bool) (string, error) {
@@ -484,6 +485,7 @@ func PromptTemplateAction(templateName string) (string, error) {
 			huh.NewSelect[string]().
 				Title(fmt.Sprintf("Template: %s - What would you like to do?", templateName)).
 				Options(
+					huh.NewOption("Inspect this template", TemplateInspect),
 					huh.NewOption("Load this template", TemplateLoad),
 					huh.NewOption("Delete this template", TemplateDelete),
 					huh.NewOption("Back", BackChoice),
@@ -565,4 +567,54 @@ func PromptTemplateDeleteConfirm(templateName string) (bool, error) {
 	}
 
 	return choice == "yes", nil
+}
+
+func PromptTemplateContinueOrExit() (bool, error) {
+	var choice string
+
+	form := huh.NewForm(
+		huh.NewGroup(
+			huh.NewSelect[string]().
+				Title("What would you like to do?").
+				Options(
+					huh.NewOption("Continue", ContinueChoice),
+					huh.NewOption("Exit", ExitChoice),
+				).
+				Value(&choice),
+		),
+	)
+
+	if err := form.Run(); err != nil {
+		return false, err
+	}
+
+	return choice == ContinueChoice, nil
+}
+
+func FormatTemplateInspect(template models.Template) string {
+	var builder strings.Builder
+
+	builder.WriteString(fmt.Sprintf("Template: %s\n", template.Name))
+	builder.WriteString(fmt.Sprintf("Created: %s\n", formatDate(template.CreatedAt)))
+	builder.WriteString(fmt.Sprintf("Agents: %d\n\n", len(template.Agents)))
+
+	agentNames := make([]string, 0, len(template.Agents))
+	for name := range template.Agents {
+		agentNames = append(agentNames, name)
+	}
+	sort.Strings(agentNames)
+
+	for _, name := range agentNames {
+		assignment := template.Agents[name]
+		sourceTag := formatSourceTag(assignment.Source)
+		modeDisplay := assignment.Mode
+		if modeDisplay == "" {
+			modeDisplay = "all (default)"
+		}
+		builder.WriteString(fmt.Sprintf("  %s [%s]\n", name, sourceTag))
+		builder.WriteString(fmt.Sprintf("    Model: %s\n", assignment.Model))
+		builder.WriteString(fmt.Sprintf("    Mode: %s\n", modeDisplay))
+	}
+
+	return builder.String()
 }

@@ -110,8 +110,12 @@ opencode-agent-switcher --version
 1. Select **Templates** from the main menu
 2. Choose:
    - **Save current configuration as template** - Enter a name and save all agent configs
-   - **Show existing templates** - View, load, or delete saved templates
-3. When loading a template:
+   - **Show existing templates** - View, inspect, load, or delete saved templates
+3. When viewing templates:
+   - **Inspect** - View all agents, models, and modes in the template
+   - **Load** - Apply the template to current agents
+   - **Delete** - Remove the template
+4. When loading a template:
    - Shows summary of agents that will be updated
    - Warns about unmatched agents (different source type)
    - Confirms before applying changes

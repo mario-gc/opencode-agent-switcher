@@ -14,6 +14,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   - Load, delete, and overwrite templates with confirmation
   - Undo support after loading a template
   - Warning for unmatched agents when loading template
+- **Template inspect**: View all agents, models, and modes in a template before loading
+
+### Fixed
+- Fixed misleading "Continue (select another agent)" message after template operations
+  - Now shows "Continue" instead in template context
 
 ## [0.6.1] - 2026-03-27
 

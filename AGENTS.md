@@ -211,10 +211,12 @@ Templates allow saving and restoring agent configurations (model + mode assignme
 - `PromptTemplateMenu()` - Save / Show / Back
 - `PromptTemplateName()` - Input name for new template
 - `PromptTemplateSelection(templates)` - Select from template list
-- `PromptTemplateAction(name)` - Load / Delete / Back
+- `PromptTemplateAction(name)` - Inspect / Load / Delete / Back
 - `PromptTemplateOverwrite(name)` - Confirm overwrite if exists
 - `PromptTemplateLoadConfirm()` - Confirm load with summary
 - `PromptTemplateDeleteConfirm(name)` - Confirm deletion
+- `PromptTemplateContinueOrExit()` - Continue / Exit after template operation
+- `FormatTemplateInspect(template)` - Format template details for display
 
 ### External CLI Dependency
 - Tool calls `opencode models` to fetch available models
