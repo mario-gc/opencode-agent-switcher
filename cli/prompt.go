@@ -11,6 +11,7 @@ import (
 	"github.com/mario-gc/opencode-agent-switcher/models"
 )
 
+// UI choice constants for user selections.
 const (
 	ExitChoice          = "__EXIT__"
 	ContinueChoice      = "__CONTINUE__"
@@ -654,9 +655,9 @@ func FormatTemplateInspect(template models.Template) string {
 		if modeDisplay == "" {
 			modeDisplay = "all (default)"
 		}
-		builder.WriteString(fmt.Sprintf("  %s [%s]\n", name, sourceTag))
-		builder.WriteString(fmt.Sprintf("    Model: %s\n", assignment.Model))
-		builder.WriteString(fmt.Sprintf("    Mode: %s\n", modeDisplay))
+		fmt.Fprintf(&builder, "  %s [%s]\n", name, sourceTag)
+		fmt.Fprintf(&builder, "    Model: %s\n", assignment.Model)
+		fmt.Fprintf(&builder, "    Mode: %s\n", modeDisplay)
 	}
 
 	return builder.String()
