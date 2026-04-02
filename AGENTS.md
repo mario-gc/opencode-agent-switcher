@@ -230,7 +230,7 @@ Templates allow saving and restoring agent configurations (model + mode assignme
 ### CD Pipeline (GoReleaser)
 The project uses GoReleaser for automated binary releases:
 
-**Trigger:** Push a version tag (e.g., `v0.6.0`)
+**Trigger:** Push a version tag (e.g., `v0.7.0`)
 
 **Process:**
 1. Tag push triggers `.github/workflows/release.yml`
@@ -243,8 +243,8 @@ The project uses GoReleaser for automated binary releases:
 **Release Flow:**
 ```bash
 # After merging to main and updating CHANGELOG.md
-git tag -a v0.6.0 -m "Release v0.6.0"
-git push origin v0.6.0
+git tag -a v0.7.0 -m "Release v0.7.0"
+git push origin v0.7.0
 # CD pipeline automatically creates the release
 ```
 

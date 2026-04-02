@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2026-04-02
+
 ### Added
 - **Templates**: Save and restore agent configurations (model + mode) as named templates
   - Templates stored globally in `~/.config/opencode-agent-switcher/templates/`
@@ -19,6 +21,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 - Fixed misleading "Continue (select another agent)" message after template operations
   - Now shows "Continue" instead in template context
+- Fixed variable shadowing warnings in golangci-lint
 
 ## [0.6.1] - 2026-03-27
 
@@ -118,7 +121,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - YAML frontmatter parsing for agent configuration files
 - MIT License
 
-[Unreleased]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.6.1...HEAD
+[Unreleased]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.7.0...HEAD
+[0.7.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.6.0...v0.6.1
 [0.6.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.5.0...v0.6.0
 [0.5.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.4.0...v0.5.0
