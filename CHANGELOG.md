@@ -5,6 +5,22 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.1.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [0.7.2] - 2026-04-02
+
+### Security
+- Updated Go version from 1.23 to 1.26
+  - Fixes GO-2026-4602: FileInfo can escape from a Root in os
+  - CVE-2026-27139 (Medium severity)
+  - Ensures continued support (Go 1.23 ended Feb 11, 2026)
+- Removed temporary workaround for GO-2026-4602 in security.yml
+
+### Changed
+- Updated CI/CD workflows to use Go 1.26
+- Updated golangci-lint from v1.64.8 to v2.11.4 (built with Go 1.26)
+- Migrated .golangci.yml to v2 format
+- Updated golangci-lint-action from v6 to v7
+- Updated documentation to reflect Go 1.26+ requirement
+
 ## [0.7.1] - 2026-04-02
 
 ### Fixed
@@ -127,7 +143,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - YAML frontmatter parsing for agent configuration files
 - MIT License
 
-[Unreleased]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.7.1...HEAD
+[Unreleased]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.7.2...HEAD
+[0.7.2]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.7.1...v0.7.2
 [0.7.1]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.7.0...v0.7.1
 [0.7.0]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.6.1...v0.7.0
 [0.6.1]: https://github.com/mario-gc/opencode-agent-switcher/compare/v0.6.0...v0.6.1
