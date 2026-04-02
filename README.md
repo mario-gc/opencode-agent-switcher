@@ -55,8 +55,8 @@ chmod +x opencode-agent-switcher
 git clone https://github.com/mario-gc/opencode-agent-switcher.git
 cd opencode-agent-switcher
 
-# Build and install
-go install
+# Install to GOPATH/bin
+go install github.com/mario-gc/opencode-agent-switcher@latest
 
 # Or build locally
 go build -o opencode-agent-switcher main.go

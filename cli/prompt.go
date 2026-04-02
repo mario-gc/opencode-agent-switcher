@@ -8,7 +8,7 @@ import (
 
 	"github.com/charmbracelet/huh"
 
-	"opencode-agent-switcher/models"
+	"github.com/mario-gc/opencode-agent-switcher/models"
 )
 
 const (

@@ -3,7 +3,7 @@ package cli
 import (
 	"testing"
 
-	"opencode-agent-switcher/models"
+	"github.com/mario-gc/opencode-agent-switcher/models"
 )
 
 func TestPromptAgentSelectionConstants(t *testing.T) {
