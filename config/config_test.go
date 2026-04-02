@@ -3,7 +3,7 @@ package config
 import (
 	"testing"
 
-	"opencode-agent-switcher/models"
+	"github.com/mario-gc/opencode-agent-switcher/models"
 )
 
 func TestIsValidModelID(t *testing.T) {

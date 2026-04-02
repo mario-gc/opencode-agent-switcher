@@ -1,4 +1,4 @@
-module opencode-agent-switcher
+module github.com/mario-gc/opencode-agent-switcher
 
 go 1.23
 

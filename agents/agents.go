@@ -7,8 +7,8 @@ import (
 	"regexp"
 	"strings"
 
-	"opencode-agent-switcher/config"
-	"opencode-agent-switcher/models"
+	"github.com/mario-gc/opencode-agent-switcher/config"
+	"github.com/mario-gc/opencode-agent-switcher/models"
 
 	"gopkg.in/yaml.v3"
 )

@@ -10,7 +10,7 @@ import (
 	"strings"
 	"time"
 
-	"opencode-agent-switcher/models"
+	"github.com/mario-gc/opencode-agent-switcher/models"
 )
 
 var validTemplateName = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_\-]*$`)
