@@ -33,6 +33,8 @@ func isValidModelID(modelID string) bool {
 	return true
 }
 
+// LoadGlobalConfig loads the global opencode configuration file.
+// Returns the configuration or an error if the file cannot be read or parsed.
 func LoadGlobalConfig() (*models.OpencodeConfig, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -43,6 +45,8 @@ func LoadGlobalConfig() (*models.OpencodeConfig, error) {
 	return loadConfigFile(configPath)
 }
 
+// LoadProjectConfig loads the project-level opencode configuration file.
+// Returns nil if the file does not exist, or an error if it cannot be parsed.
 func LoadProjectConfig() (*models.OpencodeConfig, error) {
 	configPath := filepath.Join(".", "opencode.json")
 	if _, err := os.Stat(configPath); os.IsNotExist(err) {
@@ -65,6 +69,9 @@ func loadConfigFile(configPath string) (*models.OpencodeConfig, error) {
 	return &cfg, nil
 }
 
+// GetAgentsFromConfig extracts agents from an opencode configuration.
+// Parameters location and format specify the source metadata for each agent.
+// Returns a list of agents defined in the configuration.
 func GetAgentsFromConfig(cfg *models.OpencodeConfig, location, format string) []models.Agent {
 	if cfg == nil || cfg.Agent == nil {
 		return nil
@@ -87,6 +94,8 @@ func GetAgentsFromConfig(cfg *models.OpencodeConfig, location, format string) []
 	return agentList
 }
 
+// GetAvailableModels extracts available models from an opencode configuration.
+// Returns a list of model options with provider, ID, and display name.
 func GetAvailableModels(cfg *models.OpencodeConfig) []models.ModelOption {
 	var options []models.ModelOption
 
@@ -116,6 +125,8 @@ func GetAvailableModels(cfg *models.OpencodeConfig) []models.ModelOption {
 	return options
 }
 
+// GetModelsFromCLI retrieves available models by calling the opencode CLI.
+// Returns a list of model options or an error if the CLI command fails.
 func GetModelsFromCLI() ([]models.ModelOption, error) {
 	cmd := exec.Command("opencode", "models")
 	output, err := cmd.Output()
@@ -145,6 +156,8 @@ func GetModelsFromCLI() ([]models.ModelOption, error) {
 	return options, nil
 }
 
+// GetGlobalConfigPath returns the path to the global opencode configuration file.
+// Returns an error if the user home directory cannot be determined.
 func GetGlobalConfigPath() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -153,10 +166,13 @@ func GetGlobalConfigPath() (string, error) {
 	return filepath.Join(home, ".config", "opencode", "opencode.json"), nil
 }
 
+// GetProjectConfigPath returns the path to the project-level opencode configuration file.
 func GetProjectConfigPath() string {
 	return filepath.Join(".", "opencode.json")
 }
 
+// UpdateAgentInJSON updates a field for an agent in a JSON configuration file.
+// Returns an error if the agent does not exist or the file cannot be updated.
 func UpdateAgentInJSON(configPath, agentName, field, value string) error {
 	data, err := os.ReadFile(configPath)
 	if err != nil {

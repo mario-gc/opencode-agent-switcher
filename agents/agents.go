@@ -17,6 +17,8 @@ const maxFrontmatterSize = 64 * 1024
 
 var validSegment = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_\-\.]*$`)
 
+// ValidateModelID validates a model ID string format.
+// Returns an error if the model ID is empty, exceeds 256 characters, or has invalid segments.
 func ValidateModelID(modelID string) error {
 	if modelID == "" {
 		return fmt.Errorf("model ID cannot be empty")
@@ -58,6 +60,8 @@ func isPathWithinDir(path, dir string) (bool, error) {
 	return strings.HasPrefix(absPath, absDir+string(filepath.Separator)), nil
 }
 
+// LoadAllAgents loads agents from all available sources.
+// Returns a deduplicated list with project configurations taking precedence over global ones.
 func LoadAllAgents() ([]models.Agent, error) {
 	agentMap := make(map[string]models.Agent)
 
@@ -114,10 +118,15 @@ func getProjectAgentsDir() string {
 	return filepath.Join(".", ".opencode", "agents")
 }
 
+// LoadAgents loads agents from a directory of markdown files.
+// Deprecated: Use LoadAgentsFromDir for more control over source metadata.
 func LoadAgents(agentsDir string) ([]models.Agent, error) {
 	return LoadAgentsFromDir(agentsDir, models.SourceGlobal, models.FormatMarkdown)
 }
 
+// LoadAgentsFromDir loads agents from markdown files in a directory.
+// Parameters location and format specify the source metadata for each agent.
+// Returns a list of agents with valid model fields.
 func LoadAgentsFromDir(agentsDir, location, format string) ([]models.Agent, error) {
 	absAgentsDir, err := filepath.Abs(agentsDir)
 	if err != nil {
@@ -185,6 +194,8 @@ func LoadAgentsFromDir(agentsDir, location, format string) ([]models.Agent, erro
 	return agentList, nil
 }
 
+// ParseFrontmatter extracts YAML frontmatter from markdown content.
+// Returns a map of frontmatter fields or an error if parsing fails.
 func ParseFrontmatter(content string) (map[string]interface{}, error) {
 	if !strings.HasPrefix(content, "---") {
 		return nil, fmt.Errorf("no frontmatter found")
@@ -208,6 +219,9 @@ func ParseFrontmatter(content string) (map[string]interface{}, error) {
 	return frontmatter, nil
 }
 
+// UpdateAgentModel updates the model field for an agent.
+// Supports both markdown files and JSON configuration files.
+// Returns an error if the model ID is invalid or the file cannot be updated.
 func UpdateAgentModel(agentPath, agentName, newModel string) error {
 	if err := ValidateModelID(newModel); err != nil {
 		return fmt.Errorf("invalid model ID: %w", err)
@@ -231,6 +245,9 @@ func UpdateAgentModel(agentPath, agentName, newModel string) error {
 	return updateAgentFieldInMarkdown(agentPath, "model", newModel)
 }
 
+// UpdateAgentMode updates the mode field for an agent.
+// Supports both markdown files and JSON configuration files.
+// Returns an error if the mode is invalid (must be 'primary', 'subagent', or 'all').
 func UpdateAgentMode(agentPath, agentName, newMode string) error {
 	if !isValidMode(newMode) {
 		return fmt.Errorf("invalid mode: must be 'primary', 'subagent', or 'all'")
