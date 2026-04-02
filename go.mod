@@ -1,6 +1,6 @@
 module github.com/mario-gc/opencode-agent-switcher
 
-go 1.23
+go 1.26
 
 require (
 	github.com/charmbracelet/huh v0.6.0

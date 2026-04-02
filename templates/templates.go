@@ -17,6 +17,8 @@ var validTemplateName = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_\-]*$`)
 
 const templatesDirName = "opencode-agent-switcher"
 
+// GetTemplatesDir returns the path to the templates directory.
+// Creates the directory if it doesn't exist. Returns an error if creation fails.
 func GetTemplatesDir() (string, error) {
 	home, err := os.UserHomeDir()
 	if err != nil {
@@ -29,6 +31,8 @@ func GetTemplatesDir() (string, error) {
 	return dir, nil
 }
 
+// ValidateTemplateName validates a template name format.
+// Returns an error if the name is empty, exceeds 64 characters, or contains invalid characters.
 func ValidateTemplateName(name string) error {
 	if name == "" {
 		return fmt.Errorf("template name cannot be empty")
@@ -42,6 +46,8 @@ func ValidateTemplateName(name string) error {
 	return nil
 }
 
+// TemplateExists checks if a template with the given name exists.
+// Returns true if the template exists, false otherwise.
 func TemplateExists(name string) (bool, error) {
 	dir, err := GetTemplatesDir()
 	if err != nil {
@@ -55,6 +61,9 @@ func TemplateExists(name string) (bool, error) {
 	return err == nil, err
 }
 
+// SaveTemplate saves the current agent configuration as a named template.
+// Stores the template as a JSON file in the templates directory.
+// Returns an error if the name is invalid or the file cannot be written.
 func SaveTemplate(name string, agents []models.Agent) error {
 	if err := ValidateTemplateName(name); err != nil {
 		return err
@@ -89,6 +98,8 @@ func SaveTemplate(name string, agents []models.Agent) error {
 	return os.WriteFile(path, data, 0600)
 }
 
+// LoadTemplates loads all available templates from the templates directory.
+// Returns a sorted list of templates or an error if the directory cannot be read.
 func LoadTemplates() ([]models.Template, error) {
 	dir, err := GetTemplatesDir()
 	if err != nil {
@@ -130,6 +141,8 @@ func LoadTemplates() ([]models.Template, error) {
 	return templates, nil
 }
 
+// LoadTemplateByName loads a specific template by name.
+// Returns the template or an error if it doesn't exist or cannot be parsed.
 func LoadTemplateByName(name string) (models.Template, error) {
 	dir, err := GetTemplatesDir()
 	if err != nil {
@@ -150,6 +163,8 @@ func LoadTemplateByName(name string) (models.Template, error) {
 	return template, nil
 }
 
+// DeleteTemplate removes a template file from the templates directory.
+// Returns an error if the template cannot be deleted.
 func DeleteTemplate(name string) error {
 	dir, err := GetTemplatesDir()
 	if err != nil {
@@ -164,6 +179,8 @@ func DeleteTemplate(name string) error {
 	return nil
 }
 
+// MatchAgents matches template agents with current agents by name and source.
+// Returns a list of matched agents with template assignments and a list of unmatched agent names.
 func MatchAgents(template models.Template, currentAgents []models.Agent) ([]models.Agent, []string) {
 	var matched []models.Agent
 	var unmatched []string

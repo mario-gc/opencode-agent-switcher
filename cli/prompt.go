@@ -11,6 +11,7 @@ import (
 	"github.com/mario-gc/opencode-agent-switcher/models"
 )
 
+// UI choice constants for user selections.
 const (
 	ExitChoice          = "__EXIT__"
 	ContinueChoice      = "__CONTINUE__"
@@ -28,6 +29,8 @@ const (
 	TemplateInspect     = "inspect"
 )
 
+// PromptAgentSelection prompts the user to select an agent from the list.
+// Returns the selected agent name, a special choice (SortChoice, TemplatesChoice, ExitChoice), or an error.
 func PromptAgentSelection(agents []models.Agent, currentSort string, caseSensitive bool) (string, error) {
 	var selectedName string
 
@@ -79,6 +82,8 @@ func formatSourceTag(source models.AgentSource) string {
 	return fmt.Sprintf("%s/%s", loc, fmtChar)
 }
 
+// PromptActionSelection prompts the user to choose an action for a selected agent.
+// Returns the selected action (ActionModel, ActionMode, or BackChoice) or an error.
 func PromptActionSelection(currentModel, currentMode string) (string, error) {
 	var action string
 
@@ -107,6 +112,8 @@ func PromptActionSelection(currentModel, currentMode string) (string, error) {
 	return action, nil
 }
 
+// PromptModeSelection prompts the user to select a mode for an agent.
+// Returns the selected mode (primary, subagent, or all) or an error.
 func PromptModeSelection(currentMode string) (string, error) {
 	var mode string
 
@@ -136,6 +143,8 @@ func PromptModeSelection(currentMode string) (string, error) {
 	return mode, nil
 }
 
+// PromptAddModeField prompts the user whether to add an explicit mode field.
+// Returns true if the user wants to add the field, false otherwise.
 func PromptAddModeField() (bool, error) {
 	var choice string
 
@@ -158,6 +167,8 @@ func PromptAddModeField() (bool, error) {
 	return choice == "yes", nil
 }
 
+// PromptModelSelection prompts the user to select a model from the list.
+// Returns the selected model ID, CustomModelChoice, or an error.
 func PromptModelSelection(modelOptions []models.ModelOption) (string, error) {
 	var selectedID string
 	options := make([]huh.Option[string], len(modelOptions)+1)
@@ -184,6 +195,8 @@ func PromptModelSelection(modelOptions []models.ModelOption) (string, error) {
 	return selectedID, nil
 }
 
+// PromptCustomModelInput prompts the user to enter a custom model ID.
+// Returns the entered model ID or an error.
 func PromptCustomModelInput() (string, error) {
 	var modelID string
 
@@ -203,6 +216,8 @@ func PromptCustomModelInput() (string, error) {
 	return modelID, nil
 }
 
+// PromptConfirm prompts the user with a yes/no confirmation.
+// Returns true if the user confirms, false otherwise.
 func PromptConfirm(message string) (bool, error) {
 	var confirmed bool
 
@@ -223,6 +238,8 @@ func PromptConfirm(message string) (bool, error) {
 	return confirmed, nil
 }
 
+// PromptContinueOrExit prompts the user to continue or exit the application.
+// Returns true to continue, false to exit.
 func PromptContinueOrExit() (bool, error) {
 	var choice string
 
@@ -245,6 +262,8 @@ func PromptContinueOrExit() (bool, error) {
 	return choice == ContinueChoice, nil
 }
 
+// PromptUndo prompts the user whether to undo recent changes.
+// Returns true if the user wants to undo, false to keep changes.
 func PromptUndo(message string) (bool, error) {
 	var choice string
 
@@ -288,6 +307,8 @@ func getSortDisplay(sortBy string, caseSensitive bool) string {
 	return sortType
 }
 
+// PromptSortSelection prompts the user to select a sorting method.
+// Returns the selected sort option, updated case-sensitivity flag, or an error.
 func PromptSortSelection(currentSort string, caseSensitive bool) (string, bool, error) {
 	var selected string
 
@@ -327,6 +348,8 @@ func PromptSortSelection(currentSort string, caseSensitive bool) (string, bool, 
 	return selected, caseSensitive, nil
 }
 
+// SortAgents sorts a list of agents by the specified criteria.
+// Returns a new sorted slice without modifying the original.
 func SortAgents(agents []models.Agent, sortBy string, caseSensitive bool) []models.Agent {
 	result := make([]models.Agent, len(agents))
 	copy(result, agents)
@@ -364,6 +387,8 @@ func SortAgents(agents []models.Agent, sortBy string, caseSensitive bool) []mode
 	return result
 }
 
+// SortModels sorts a list of model options by the specified criteria.
+// Returns a new sorted slice without modifying the original.
 func SortModels(modelOptions []models.ModelOption, sortBy string, caseSensitive bool) []models.ModelOption {
 	result := make([]models.ModelOption, len(modelOptions))
 	copy(result, modelOptions)
@@ -393,6 +418,8 @@ func SortModels(modelOptions []models.ModelOption, sortBy string, caseSensitive 
 	return result
 }
 
+// PromptTemplateMenu prompts the user to choose a template operation.
+// Returns the selected action (TemplateSave, TemplateShow, or BackChoice) or an error.
 func PromptTemplateMenu() (string, error) {
 	var choice string
 
@@ -416,6 +443,8 @@ func PromptTemplateMenu() (string, error) {
 	return choice, nil
 }
 
+// PromptTemplateName prompts the user to enter a name for a new template.
+// Returns the entered name or an error.
 func PromptTemplateName() (string, error) {
 	var name string
 
@@ -435,6 +464,8 @@ func PromptTemplateName() (string, error) {
 	return name, nil
 }
 
+// PromptTemplateSelection prompts the user to select a template from the list.
+// Returns the selected template name, BackChoice, or an error.
 func PromptTemplateSelection(templates []models.Template) (string, error) {
 	if len(templates) == 0 {
 		return "", nil
@@ -477,6 +508,8 @@ func formatDate(timestamp string) string {
 	return t.Format("2006-01-02")
 }
 
+// PromptTemplateAction prompts the user to choose an action for a selected template.
+// Returns the selected action (TemplateInspect, TemplateLoad, TemplateDelete, or BackChoice) or an error.
 func PromptTemplateAction(templateName string) (string, error) {
 	var action string
 
@@ -501,6 +534,8 @@ func PromptTemplateAction(templateName string) (string, error) {
 	return action, nil
 }
 
+// PromptTemplateOverwrite prompts the user whether to overwrite an existing template.
+// Returns true if the user confirms overwrite, false otherwise.
 func PromptTemplateOverwrite(templateName string) (bool, error) {
 	var choice string
 
@@ -523,6 +558,9 @@ func PromptTemplateOverwrite(templateName string) (bool, error) {
 	return choice == "yes", nil
 }
 
+// PromptTemplateLoadConfirm prompts the user to confirm loading a template.
+// Shows the number of matched and unmatched agents.
+// Returns true if the user confirms, false otherwise.
 func PromptTemplateLoadConfirm(matchedCount, unmatchedCount int) (bool, error) {
 	var choice string
 
@@ -547,6 +585,8 @@ func PromptTemplateLoadConfirm(matchedCount, unmatchedCount int) (bool, error) {
 	return choice == "yes", nil
 }
 
+// PromptTemplateDeleteConfirm prompts the user to confirm deleting a template.
+// Returns true if the user confirms, false otherwise.
 func PromptTemplateDeleteConfirm(templateName string) (bool, error) {
 	var choice string
 
@@ -569,6 +609,8 @@ func PromptTemplateDeleteConfirm(templateName string) (bool, error) {
 	return choice == "yes", nil
 }
 
+// PromptTemplateContinueOrExit prompts the user to continue or exit after template operations.
+// Returns true to continue, false to exit.
 func PromptTemplateContinueOrExit() (bool, error) {
 	var choice string
 
@@ -591,12 +633,14 @@ func PromptTemplateContinueOrExit() (bool, error) {
 	return choice == ContinueChoice, nil
 }
 
+// FormatTemplateInspect formats a template for inspection display.
+// Returns a formatted string showing template name, creation date, and all agent assignments.
 func FormatTemplateInspect(template models.Template) string {
 	var builder strings.Builder
 
-	builder.WriteString(fmt.Sprintf("Template: %s\n", template.Name))
-	builder.WriteString(fmt.Sprintf("Created: %s\n", formatDate(template.CreatedAt)))
-	builder.WriteString(fmt.Sprintf("Agents: %d\n\n", len(template.Agents)))
+	fmt.Fprintf(&builder, "Template: %s\n", template.Name)
+	fmt.Fprintf(&builder, "Created: %s\n", formatDate(template.CreatedAt))
+	fmt.Fprintf(&builder, "Agents: %d\n\n", len(template.Agents))
 
 	agentNames := make([]string, 0, len(template.Agents))
 	for name := range template.Agents {
@@ -611,9 +655,9 @@ func FormatTemplateInspect(template models.Template) string {
 		if modeDisplay == "" {
 			modeDisplay = "all (default)"
 		}
-		builder.WriteString(fmt.Sprintf("  %s [%s]\n", name, sourceTag))
-		builder.WriteString(fmt.Sprintf("    Model: %s\n", assignment.Model))
-		builder.WriteString(fmt.Sprintf("    Mode: %s\n", modeDisplay))
+		fmt.Fprintf(&builder, "  %s [%s]\n", name, sourceTag)
+		fmt.Fprintf(&builder, "    Model: %s\n", assignment.Model)
+		fmt.Fprintf(&builder, "    Mode: %s\n", modeDisplay)
 	}
 
 	return builder.String()

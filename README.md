@@ -2,7 +2,7 @@
 
 [![Go Report Card](https://goreportcard.com/badge/github.com/mario-gc/opencode-agent-switcher)](https://goreportcard.com/report/github.com/mario-gc/opencode-agent-switcher)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
-[![Go Version](https://img.shields.io/badge/Go-1.23+-00ADD8?logo=go)](https://golang.org/)
+[![Go Version](https://img.shields.io/badge/Go-1.26+-00ADD8?logo=go)](https://golang.org/)
 
 A CLI tool for managing and switching AI models and modes for Opencode agents.
 
@@ -28,7 +28,7 @@ A CLI tool for managing and switching AI models and modes for Opencode agents.
 
 ## Prerequisites
 
-- **Go:** Version 1.23 or higher
+- **Go:** Version 1.26 or higher
 - **Opencode:** The `opencode` CLI tool must be installed and configured
 
 ## Installation
@@ -39,10 +39,10 @@ Download the latest release for your platform from the [Releases page](https://g
 
 ```bash
 # Linux (amd64)
-curl -sL https://github.com/mario-gc/opencode-agent-switcher/releases/latest/download/opencode-agent-switcher_0.7.0_linux_amd64.tar.gz | tar xz
+curl -sL https://github.com/mario-gc/opencode-agent-switcher/releases/latest/download/opencode-agent-switcher_0.7.2_linux_amd64.tar.gz | tar xz
 
 # Linux (arm64)
-curl -sL https://github.com/mario-gc/opencode-agent-switcher/releases/latest/download/opencode-agent-switcher_0.7.0_linux_arm64.tar.gz | tar xz
+curl -sL https://github.com/mario-gc/opencode-agent-switcher/releases/latest/download/opencode-agent-switcher_0.7.2_linux_arm64.tar.gz | tar xz
 
 # Make executable
 chmod +x opencode-agent-switcher
@@ -85,7 +85,7 @@ opencode-agent-switcher
 
 ```bash
 opencode-agent-switcher --version
-# Output: opencode-agent-switcher 0.7.0 (commit: abc1234, built: 2026-04-02)
+# Output: opencode-agent-switcher 0.7.2 (commit: abc1234, built: 2026-04-02)
 ```
 
 ### Workflow

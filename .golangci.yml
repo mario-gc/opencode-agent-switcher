@@ -1,54 +1,59 @@
+version: "2"
+
 linters:
   enable:
     - errcheck
-    - gosimple
     - govet
     - ineffassign
     - staticcheck
     - unused
-    - gofmt
-    - goimports
     - misspell
     - revive
 
-linters-settings:
-  errcheck:
-    check-type-assertions: true
-    check-blank: true
+  settings:
+    errcheck:
+      check-type-assertions: true
+      check-blank: true
 
-  govet:
-    enable-all: true
-    disable:
-      - fieldalignment
+    govet:
+      enable-all: true
+      disable:
+        - fieldalignment
 
-  revive:
+    revive:
+      rules:
+        - name: exported
+          arguments:
+            - disableStutteringCheck
+        - name: var-naming
+        - name: package-comments
+          disabled: true
+
+    misspell:
+      locale: US
+
+  exclusions:
     rules:
-      - name: exported
-        arguments:
-          - disableStutteringCheck
-      - name: var-naming
-      - name: package-comments
-        disabled: true
+      - path: _test\.go
+        linters:
+          - errcheck
 
-  gofmt:
-    simplify: true
+formatters:
+  enable:
+    - gofmt
+    - goimports
 
-  goimports:
-    local-prefixes: opencode-agent-switcher
+  settings:
+    gofmt:
+      simplify: true
 
-  misspell:
-    locale: US
+    goimports:
+      local-prefixes:
+        - opencode-agent-switcher
 
 issues:
-  exclude-rules:
-    - path: _test\.go
-      linters:
-        - errcheck
-
   max-issues-per-linter: 50
   max-same-issues: 3
-  new: false
 
 run:
-  timeout: 5m
   modules-download-mode: readonly

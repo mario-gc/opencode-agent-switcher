@@ -6,7 +6,7 @@ This document provides instructions and guidelines for AI agents operating withi
 
 `opencode-agent-switcher` is a Go CLI tool designed to manage and switch AI models and modes for various agents in the Opencode environment. It interacts with the `opencode` CLI and modifies agent configuration files.
 
-- **Language:** Go 1.23+
+- **Language:** Go 1.26+
 - **Entry Point:** `main.go`
 - **Module:** `opencode-agent-switcher`
 - **Dependencies:** 
@@ -230,7 +230,7 @@ Templates allow saving and restoring agent configurations (model + mode assignme
 ### CD Pipeline (GoReleaser)
 The project uses GoReleaser for automated binary releases:
 
-**Trigger:** Push a version tag (e.g., `v0.7.0`)
+**Trigger:** Push a version tag (e.g., `v0.7.2`)
 
 **Process:**
 1. Tag push triggers `.github/workflows/release.yml`
@@ -243,8 +243,8 @@ The project uses GoReleaser for automated binary releases:
 **Release Flow:**
 ```bash
 # After merging to main and updating CHANGELOG.md
-git tag -a v0.7.0 -m "Release v0.7.0"
-git push origin v0.7.0
+git tag -a v0.7.2 -m "Release v0.7.2"
+git push origin v0.7.2
 # CD pipeline automatically creates the release
 ```
 
