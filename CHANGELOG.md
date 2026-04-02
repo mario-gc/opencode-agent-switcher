@@ -17,6 +17,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 - Updated CI/CD workflows to use Go 1.26
 - Updated golangci-lint from v1.64.8 to v2.11.4 (built with Go 1.26)
+- Migrated .golangci.yml to v2 format
+- Updated golangci-lint-action from v6 to v7
 - Updated documentation to reflect Go 1.26+ requirement
 
 ## [0.7.1] - 2026-04-02
