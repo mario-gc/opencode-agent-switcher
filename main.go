@@ -5,11 +5,11 @@ import (
 	"log"
 	"os"
 
-	"opencode-agent-switcher/agents"
-	"opencode-agent-switcher/cli"
-	"opencode-agent-switcher/config"
-	"opencode-agent-switcher/models"
-	"opencode-agent-switcher/templates"
+	"github.com/mario-gc/opencode-agent-switcher/agents"
+	"github.com/mario-gc/opencode-agent-switcher/cli"
+	"github.com/mario-gc/opencode-agent-switcher/config"
+	"github.com/mario-gc/opencode-agent-switcher/models"
+	"github.com/mario-gc/opencode-agent-switcher/templates"
 )
 
 var (

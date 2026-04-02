@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"opencode-agent-switcher/models"
+	"github.com/mario-gc/opencode-agent-switcher/models"
 )
 
 func TestValidateTemplateName(t *testing.T) {

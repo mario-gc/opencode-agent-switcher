@@ -9,7 +9,7 @@ import (
 	"regexp"
 	"strings"
 
-	"opencode-agent-switcher/models"
+	"github.com/mario-gc/opencode-agent-switcher/models"
 )
 
 var validSegmentPattern = regexp.MustCompile(`^[a-zA-Z0-9][a-zA-Z0-9_\-\.]*$`)

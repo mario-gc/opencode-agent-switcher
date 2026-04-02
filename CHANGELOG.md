@@ -7,6 +7,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Corrected module name in go.mod to `github.com/mario-gc/opencode-agent-switcher`
+  - Fixes Go Report Card analysis error
+  - Enables proper `go install` from GitHub
+
 ## [0.7.0] - 2026-04-02
 
 ### Added
