@@ -39,10 +39,10 @@ Download the latest release for your platform from the [Releases page](https://g
 
 ```bash
 # Linux (amd64)
-curl -sL https://github.com/mario-gc/opencode-agent-switcher/releases/latest/download/opencode-agent-switcher_0.7.0_linux_amd64.tar.gz | tar xz
+curl -sL https://github.com/mario-gc/opencode-agent-switcher/releases/latest/download/opencode-agent-switcher_0.7.2_linux_amd64.tar.gz | tar xz
 
 # Linux (arm64)
-curl -sL https://github.com/mario-gc/opencode-agent-switcher/releases/latest/download/opencode-agent-switcher_0.7.0_linux_arm64.tar.gz | tar xz
+curl -sL https://github.com/mario-gc/opencode-agent-switcher/releases/latest/download/opencode-agent-switcher_0.7.2_linux_arm64.tar.gz | tar xz
 
 # Make executable
 chmod +x opencode-agent-switcher
@@ -85,7 +85,7 @@ opencode-agent-switcher
 
 ```bash
 opencode-agent-switcher --version
-# Output: opencode-agent-switcher 0.7.0 (commit: abc1234, built: 2026-04-02)
+# Output: opencode-agent-switcher 0.7.2 (commit: abc1234, built: 2026-04-02)
 ```
 
 ### Workflow
