@@ -43,14 +43,14 @@ func TestSaveAndLoadTemplate(t *testing.T) {
 	}
 	defer os.RemoveAll(tmpDir)
 
-	oldDir, err := GetTemplatesDir()
-	if err == nil {
+	oldDir, dirErr := GetTemplatesDir()
+	if dirErr == nil {
 		os.RemoveAll(oldDir)
 	}
 
 	homeDir := filepath.Join(tmpDir, "home")
-	if err := os.MkdirAll(homeDir, 0755); err != nil {
-		t.Fatalf("Failed to create home dir: %v", err)
+	if mkdirErr := os.MkdirAll(homeDir, 0755); mkdirErr != nil {
+		t.Fatalf("Failed to create home dir: %v", mkdirErr)
 	}
 
 	os.Setenv("HOME", homeDir)
@@ -74,13 +74,13 @@ func TestSaveAndLoadTemplate(t *testing.T) {
 	}
 
 	templateName := "test-template"
-	if err := SaveTemplate(templateName, agents); err != nil {
-		t.Fatalf("SaveTemplate() error = %v", err)
+	if saveErr := SaveTemplate(templateName, agents); saveErr != nil {
+		t.Fatalf("SaveTemplate() error = %v", saveErr)
 	}
 
-	templates, err := LoadTemplates()
-	if err != nil {
-		t.Fatalf("LoadTemplates() error = %v", err)
+	templates, loadErr := LoadTemplates()
+	if loadErr != nil {
+		t.Fatalf("LoadTemplates() error = %v", loadErr)
 	}
 
 	if len(templates) != 1 {
@@ -129,8 +129,8 @@ func TestTemplateExists(t *testing.T) {
 	agents := []models.Agent{
 		{Name: "test", CurrentModel: "test/model", Source: models.AgentSource{}},
 	}
-	if err := SaveTemplate("existing", agents); err != nil {
-		t.Fatalf("SaveTemplate() error = %v", err)
+	if saveErr := SaveTemplate("existing", agents); saveErr != nil {
+		t.Fatalf("SaveTemplate() error = %v", saveErr)
 	}
 
 	exists, err = TemplateExists("existing")
@@ -155,17 +155,17 @@ func TestDeleteTemplate(t *testing.T) {
 	agents := []models.Agent{
 		{Name: "test", CurrentModel: "test/model", Source: models.AgentSource{}},
 	}
-	if err := SaveTemplate("to-delete", agents); err != nil {
-		t.Fatalf("SaveTemplate() error = %v", err)
+	if saveErr := SaveTemplate("to-delete", agents); saveErr != nil {
+		t.Fatalf("SaveTemplate() error = %v", saveErr)
 	}
 
-	if err := DeleteTemplate("to-delete"); err != nil {
-		t.Fatalf("DeleteTemplate() error = %v", err)
+	if delErr := DeleteTemplate("to-delete"); delErr != nil {
+		t.Fatalf("DeleteTemplate() error = %v", delErr)
 	}
 
-	exists, err := TemplateExists("to-delete")
-	if err != nil {
-		t.Fatalf("TemplateExists() error = %v", err)
+	exists, checkErr := TemplateExists("to-delete")
+	if checkErr != nil {
+		t.Fatalf("TemplateExists() error = %v", checkErr)
 	}
 	if exists {
 		t.Error("Template still exists after deletion")
@@ -185,13 +185,13 @@ func TestLoadTemplateByName(t *testing.T) {
 	agents := []models.Agent{
 		{Name: "test", CurrentModel: "test/model", Mode: "primary", Source: models.AgentSource{}},
 	}
-	if err := SaveTemplate("my-template", agents); err != nil {
-		t.Fatalf("SaveTemplate() error = %v", err)
+	if saveErr := SaveTemplate("my-template", agents); saveErr != nil {
+		t.Fatalf("SaveTemplate() error = %v", saveErr)
 	}
 
-	template, err := LoadTemplateByName("my-template")
-	if err != nil {
-		t.Fatalf("LoadTemplateByName() error = %v", err)
+	template, loadErr := LoadTemplateByName("my-template")
+	if loadErr != nil {
+		t.Fatalf("LoadTemplateByName() error = %v", loadErr)
 	}
 
 	if template.Name != "my-template" {

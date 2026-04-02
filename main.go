@@ -354,8 +354,8 @@ func handleTemplateSave(agentList []models.Agent) (bool, error) {
 		return false, err
 	}
 
-	if err := templates.ValidateTemplateName(name); err != nil {
-		fmt.Printf("Invalid template name: %v\n", err)
+	if validErr := templates.ValidateTemplateName(name); validErr != nil {
+		fmt.Printf("Invalid template name: %v\n", validErr)
 		return true, nil
 	}
 
@@ -374,8 +374,8 @@ func handleTemplateSave(agentList []models.Agent) (bool, error) {
 		}
 	}
 
-	if err := templates.SaveTemplate(name, agentList); err != nil {
-		fmt.Printf("Failed to save template: %v\n", err)
+	if saveErr := templates.SaveTemplate(name, agentList); saveErr != nil {
+		fmt.Printf("Failed to save template: %v\n", saveErr)
 		return true, nil
 	}
 
